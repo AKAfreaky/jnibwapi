@@ -227,12 +227,40 @@ public class AIClient implements BWAPIEventListener, Runnable{
 			manager.unitShow(unitID);
 		}
 	}
-	
-	public void unitRenegade(int unitID) {}
-	public void saveGame(String gameName) {}
-	public void unitComplete(int unitID) {}
-	public void playerDropped(int playerID) {}
-	public void sendText(String text) {}
-	public void receiveText(String text) {}
-	
+
+	@Override
+	public void sendText(String text) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void receiveText(String text) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unitRenegade(int unitID) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void saveGame(String gameName) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unitComplete(int unitID) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void playerDropped(int playerID) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -2,6 +2,7 @@ package scbod;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.List;
 
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.BaseLocation;
@@ -125,7 +126,7 @@ public class IntelligenceManager extends Manager {
 	 */
 	public ChokePoint getEnemyChokePoint(){
 		if(enemyChokePoint  == null && foundEnemyBase()){
-			ArrayList<ChokePoint> chokePoints = (ArrayList<ChokePoint>) bwapi.getMap().getChokePoints();
+			List<ChokePoint> chokePoints = bwapi.getMap().getChokePoints();
 			ChokePoint closestLocation = null;
 			double smallestDistance = Utility.NOT_SET;
 			for(ChokePoint location: chokePoints){

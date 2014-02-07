@@ -2,6 +2,7 @@ package scbod;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -311,8 +312,18 @@ public class MilitaryManager extends Manager {
 			}
 		}
 		if(startRegion != null){
-			ChokePoint chokePoint = (ChokePoint) startRegion.getChokePoints().toArray()[0];
-			destination = new Point(chokePoint.getCenterX(), chokePoint.getCenterY());
+			// TODO:: Does the start region only have a single choke?			
+			Iterator<ChokePoint> it = startRegion.getChokePoints().iterator();
+			if (it.hasNext())
+			{
+				ChokePoint chokePoint = it.next();
+				destination = new Point(chokePoint.getCenterX(), chokePoint.getCenterY());
+			}
+			else
+			{
+				System.out.println("Error setting start choke point / military destination");
+				destination = new Point(0,0);
+			}
 		}
 		else{
 			System.out.println("Error setting start choke point / military destination");

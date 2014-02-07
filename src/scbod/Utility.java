@@ -1,7 +1,7 @@
 package scbod;
 
 import java.awt.Point;
-import java.util.ArrayList;
+import java.util.List;
 
 import jnibwapi.model.Unit;
 
@@ -17,7 +17,7 @@ public class Utility {
 	}
 	
 	/** Returns the closest unit in a given list to the given coordinates */
-	public static Unit getClosestUnit(ArrayList<Unit> units, Point location){
+	public static Unit getClosestUnit(List<Unit> units, Point location){
 		Unit closestUnit = null;
 		double smallestDistance = Utility.NOT_SET;
 		for(Unit unit: units){
@@ -35,7 +35,7 @@ public class Utility {
 	 * and of the given type. 
 	 * 
 	 */
-	public static Unit getClosestUnitOfType(ArrayList<Unit> units, Point location, int unitType){
+	public static Unit getClosestUnitOfType(List<Unit> units, Point location, int unitType){
 		Unit closestUnit = null;
 		double smallestDistance = Utility.NOT_SET;
 		for(Unit unit: units){
@@ -53,7 +53,7 @@ public class Utility {
 	}
 	
 	/** Returns the closest location in a given list to the given coordinates */
-	public static Point getClosestLocation(ArrayList<Point> points, Point target){
+	public static Point getClosestLocation(List<Point> points, Point target){
 		Point closestPoint = null;
 		double smallestDistance = Utility.NOT_SET;
 		for(Point point: points){
