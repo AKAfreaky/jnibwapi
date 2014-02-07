@@ -1,15 +1,16 @@
 package scbod;
 
+import java.awt.Point;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.HashSet;
 import java.util.Random;
-import java.awt.Point;
 
 import sun.util.calendar.BaseCalendar;
+
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.BaseLocation;
 import jnibwapi.model.Unit;
@@ -306,21 +307,24 @@ public class BuildingManager extends Manager {
 	}
 	
 	private void calculateExpansionLocations(Unit hatchery){
-		ArrayList<BaseLocation> baseList = (ArrayList<BaseLocation>) bwapi.getMap().getBaseLocations();
-		BaseLocation homeBase = getNextClosestExpansionLocation(baseList, hatchery);
-		baseList.remove(homeBase); // Remove the home base, don't care about it
+		List<BaseLocation> iBaseList = bwapi.getMap().getBaseLocations(); // immutable base list
+		System.out.println("Found " + iBaseList.size() + " base locations");
+		ArrayList<BaseLocation> mBaseList = new ArrayList<BaseLocation>(iBaseList);
+		BaseLocation homeBase = getNextClosestExpansionLocation(mBaseList, hatchery);
+		mBaseList.remove(homeBase); // Remove the home base, don't care about it
 		for(int i = 0; i < 3; i++){
-			BaseLocation expansion = getNextClosestExpansionLocation(baseList, hatchery);
+			BaseLocation expansion = getNextClosestExpansionLocation(mBaseList, hatchery);
 			expansionLocations.add(expansion);
-			baseList.remove(expansion); // Add the first location to the expansion list
+			mBaseList.remove(expansion);
 			System.out.println("Added expansion location " + expansion.getTx() + " - " + expansion.getTy());
 		}
+		
 	}
 	
 	private BaseLocation getNextClosestExpansionLocation(ArrayList<BaseLocation> expansions, Unit hatchery){
 		double closestDistance = Utility.NOT_SET;
 		BaseLocation closestLocation = null;
-		for(BaseLocation location : bwapi.getMap().getBaseLocations()){
+		for(BaseLocation location : expansions){
 			double distance = Utility.getDistance(hatchery.getX(), hatchery.getY(),
 					location.getX(), location.getY());
 			if(distance < closestDistance || closestDistance == Utility.NOT_SET){
@@ -505,7 +509,7 @@ public class BuildingManager extends Manager {
 		Point baseLocation = new Point(base.getX(), base.getY());
 		
 		// Find the nearest free geyser
-		geyser = Utility.getClosestUnitOfType((ArrayList<Unit>) bwapi.getNeutralUnits(),baseLocation,
+		geyser = Utility.getClosestUnitOfType(bwapi.getNeutralUnits(),baseLocation,
 				UnitTypes.Resource_Vespene_Geyser.ordinal());
 		
 		// No free geyser found, give up.
