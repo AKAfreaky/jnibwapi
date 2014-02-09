@@ -142,12 +142,13 @@ public class WorkerManager extends Manager
 
 	public Unit getNearestFreeWorker(int tileX, int tileY)
 	{
+		System.out.println("Looking for nearest free worker...");
 		Unit worker = null;
 		double currentShortestDistance = Utility.NOT_SET;
 		// Find the nearest drone
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			if (unit.getTypeID() == getWorkerTypeID()
+			if (unit.getTypeID() == workerTypeID
 					&& !isWorkerBusy(unit.getID())
 					&& !isGasWorker(unit.getID()))
 			{
@@ -160,6 +161,9 @@ public class WorkerManager extends Manager
 				}
 			}
 		}
+		
+		System.out.printf("%s", (worker == null) ? "Couldn't find a free worker" : "Found worker ID: " + worker.getID() + "." );
+		
 		return worker;
 	}
 
@@ -416,7 +420,7 @@ public class WorkerManager extends Manager
 		Unit unit = bwapi.getUnit(unitID);
 		if (unit.getPlayerID() == bwapi.getSelf().getID())
 		{
-			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
+			if (unit.getTypeID() == workerTypeID)
 			{
 				workers.add(unitID);
 			}
@@ -425,7 +429,7 @@ public class WorkerManager extends Manager
 				extractors.add(new ExtractorInfo(unitID));
 			}
 			if (workers.contains(unitID)
-					&& unit.getTypeID() != UnitTypes.Zerg_Drone.ordinal())
+					&& unit.getTypeID() != workerTypeID)
 			{
 				workers.remove(unitID);
 			}
@@ -437,6 +441,7 @@ public class WorkerManager extends Manager
 	{
 		if (!busyWorkers.contains(worker.getID()))
 		{
+			System.out.println("Worker number " + worker.getID() + " was idle. Cracking the whip...");
 			calculateMining(worker.getID());
 		}
 	}
