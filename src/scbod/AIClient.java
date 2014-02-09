@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import jnibwapi.BWAPIEventListener;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
+import jnibwapi.types.RaceType.RaceTypes;
 
 /**
  * Java AI Client using JNI-BWAPI.
@@ -23,7 +24,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 	/** Managers */
 	private ArrayList<Manager>	managers;
 	public ResourceManager		resourceManager;
-	public ProductionManager	productionManager;
+	public ZergProductionManager	productionManager;
 	public IntelligenceManager	intelligenceManager;
 	public UnitManager			unitManager;
 	public WorkerManager		workerManager;
@@ -105,8 +106,14 @@ public class AIClient implements BWAPIEventListener, Runnable
 		unitManager = new UnitManager(bwapi);
 		workerManager = new WorkerManager(bwapi);
 		intelligenceManager = new IntelligenceManager(bwapi, unitManager, workerManager);
-		buildingManager = new BuildingManager(bwapi, unitManager, workerManager, resourceManager);
-		productionManager = new ProductionManager(bwapi, resourceManager, buildingManager);
+		
+		if (bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal())
+		{
+			buildingManager = new ZergBuildingManager(bwapi, unitManager, workerManager, resourceManager);
+			productionManager = new ZergProductionManager(bwapi, resourceManager, buildingManager);
+		}
+		
+		
 		upgradeManager = new UpgradeManager(bwapi, unitManager, resourceManager);
 		militaryManager = new MilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
 
@@ -128,7 +135,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 		// Load BWTA data
 		bwapi.loadMapData(true);
 		// Set gamespeed
-		bwapi.setGameSpeed(2);
+		bwapi.setGameSpeed(2);		
 
 		if (DEBUG)
 		{
