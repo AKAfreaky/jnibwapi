@@ -12,6 +12,7 @@ import jnibwapi.JNIBWAPI;
 import jnibwapi.model.BaseLocation;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType;
+import jnibwapi.types.RaceType.RaceTypes;
 import jnibwapi.types.UnitType.UnitTypes;
 import jnibwapi.util.BWColor;
 
@@ -34,7 +35,7 @@ public class BuildingManager extends Manager
 	 * of the game and when new hatcheries or creep colonies are built, and
 	 * these determine where buildings should be placed
 	 */
-	private ArrayList<Point>		buildLocations		= new ArrayList<Point>();
+	protected ArrayList<Point>		buildLocations		= new ArrayList<Point>();
 
 	/** Index into the buildLocations array */
 	private int						nextBuildLocation;
@@ -50,9 +51,8 @@ public class BuildingManager extends Manager
 	private int						nextExpansionLocation;
 
 	// Info used for generating new building locations
-	private ArrayList<BaseInfo>		baseHatcheries		= new ArrayList<BaseInfo>();
-	private ArrayList<BaseInfo>		creepColonies		= new ArrayList<BaseInfo>();
-
+	private ArrayList<BaseInfo>		baseBuildings		= new ArrayList<BaseInfo>();
+	
 	/* Index for the next expansion */
 	private int						expansionIndex;
 
@@ -60,15 +60,18 @@ public class BuildingManager extends Manager
 
 	/** ID for expansion building worker */
 	private int						expansionWorker		= Utility.NOT_SET;
+	
+	protected int					baseTypeID;
+	protected int					extractorTypeID;
 
 	// Map sizes
 	private int						mapSizeX;
 	private int						mapSizeY;
 
-	private JNIBWAPI				bwapi;
-	private UnitManager				unitManager;
+	protected JNIBWAPI				bwapi;
+	protected UnitManager				unitManager;
 	private WorkerManager			workerManager;
-	private ResourceManager			resourceManager;
+	protected ResourceManager			resourceManager;
 
 	public BuildingManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager,
 			ResourceManager resourceManager)
@@ -109,13 +112,13 @@ public class BuildingManager extends Manager
 	}
 
 	/** Calculates all of the build locations for a given hatchery / expansion */
-	private void calculateBuildLocationsHatchery(BaseInfo hatchInfo)
+	private void calculateBuildLocationsForBase(BaseInfo baseInfo)
 	{
-		Direction mineralDirection = getMineralDirection(hatchInfo.structure);
-		Direction geyserDirection = getGeyserDirection(hatchInfo.structure);
+		Direction mineralDirection = getMineralDirection(baseInfo.structure);
+		Direction geyserDirection = getGeyserDirection(baseInfo.structure);
 
-		int hatcheryCentreX = hatchInfo.structure.getTileX() + 2;
-		int hatcheryCentreY = hatchInfo.structure.getTileY() + 2;
+		int baseCentreX = baseInfo.structure.getTileX() + 2;
+		int baseCentreY = baseInfo.structure.getTileY() + 2;
 		// The start coordinates, which are generally opposite the geyser.
 		int startX = 1;
 		int startY = 0;
@@ -207,26 +210,27 @@ public class BuildingManager extends Manager
 		{
 			negativeBuildValueY = -2;
 		}
-		buildLocations.add(new Point(hatcheryCentreX
-				+ ((startX * 2 + negativeStartValueX) + (buildX * -1 + negativeBuildValueX)), hatcheryCentreY
+		buildLocations.add(new Point(baseCentreX
+				+ ((startX * 2 + negativeStartValueX) + (buildX * -1 + negativeBuildValueX)), baseCentreY
 				+ ((startY * 2 + negativeStartValueY) + (buildY * -1 + negativeBuildValueY))));
-		hatchInfo.buildingIndexes.add(buildLocations.size() - 1);
-		buildLocations.add(new Point(hatcheryCentreX
-				+ ((startX * 2 + negativeStartValueX) + (buildX * 3 + negativeBuildValueX)), hatcheryCentreY
+		baseInfo.buildingIndexes.add(buildLocations.size() - 1);
+		buildLocations.add(new Point(baseCentreX
+				+ ((startX * 2 + negativeStartValueX) + (buildX * 3 + negativeBuildValueX)), baseCentreY
 				+ ((startY * 2 + negativeStartValueY) + (buildY * 3 + negativeBuildValueY))));
-		hatchInfo.buildingIndexes.add(buildLocations.size() - 1);
-		buildLocations.add(new Point(hatcheryCentreX
-				+ ((startX * -3 + negativeStartValueX) + (buildX * 3 + negativeBuildValueX)), hatcheryCentreY
+		baseInfo.buildingIndexes.add(buildLocations.size() - 1);
+		buildLocations.add(new Point(baseCentreX
+				+ ((startX * -3 + negativeStartValueX) + (buildX * 3 + negativeBuildValueX)), baseCentreY
 				+ ((startY * -3 + negativeStartValueY) + (buildY * 3 + negativeBuildValueY))));
-		hatchInfo.buildingIndexes.add(buildLocations.size() - 1);
+		baseInfo.buildingIndexes.add(buildLocations.size() - 1);
 
 		// Defence location is updated to be the last ones, so that defences are
 		// built at expansions first.
 		nextDefenceLocation = buildLocations.size() - 1;
 	}
 
+	//TODO: Zerg Specific
 	/** Calculates all of the build locations for a given creep colony */
-	private void calculateBuildLocationsColony(BaseInfo colonyInfo, Unit hatchery)
+	protected void calculateBuildLocationsColony(BaseInfo colonyInfo, Unit hatchery)
 	{
 
 		Direction hatcheryDirection = getHatcheryDirection(colonyInfo.structure, hatchery);
@@ -268,7 +272,7 @@ public class BuildingManager extends Manager
 		System.out.println("Colony locations added!");
 	}
 
-	private Point getNextBuildLocation()
+	protected Point getNextBuildLocation()
 	{
 		System.out.println("Getting building location");
 		if (buildLocations.size() == 0)
@@ -284,13 +288,12 @@ public class BuildingManager extends Manager
 		}
 		catch (Exception e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	private Point getNextDefenceLocation()
+	protected Point getNextDefenceLocation()
 	{
 		System.out.println("Getting defence building location");
 		if (buildLocations.size() == 0)
@@ -313,7 +316,6 @@ public class BuildingManager extends Manager
 		}
 		catch (Exception e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -321,10 +323,7 @@ public class BuildingManager extends Manager
 
 	private void calculateExpansionLocations(Unit hatchery)
 	{
-		List<BaseLocation> iBaseList = bwapi.getMap().getBaseLocations(); // immutable
-																			// base
-																			// list
-		System.out.println("Found " + iBaseList.size() + " base locations");
+		List<BaseLocation> iBaseList = bwapi.getMap().getBaseLocations(); // immutable base list
 		ArrayList<BaseLocation> mBaseList = new ArrayList<BaseLocation>(iBaseList);
 		BaseLocation homeBase = getNextClosestExpansionLocation(mBaseList, hatchery);
 		mBaseList.remove(homeBase); // Remove the home base, don't care about it
@@ -477,16 +476,19 @@ public class BuildingManager extends Manager
 			return false;
 		}
 
-		System.out.println("Worker ID : " + worker.getID());
+		System.out.println("Using worker number " + worker.getID() + " to build.");
+		boolean retVal = bwapi.build(worker.getID(), tileX, tileY, buildingType);
+		System.out.println("Build command was " + ((retVal) ? "successful." : "a failure."));
+		
+		//TODO: Work out what this crap was meant to do :)
+		
 		// workerManager.addBusyWorker(worker.getID());
-		System.out.println("Stopping worker" + worker.getID());
 		// try {
 		// Thread.sleep(500);
 		// } catch (InterruptedException e) {
 		// e.printStackTrace();
 		// }
-		bwapi.build(worker.getID(), tileX, tileY, buildingType);
-		System.out.println("Giving build order" + worker.getID());
+		
 
 		// try {
 		// Thread.sleep(500);
@@ -580,7 +582,7 @@ public class BuildingManager extends Manager
 		}
 
 		workerManager.addBusyWorker(worker.getID());
-		bwapi.build(worker.getID(), geyser.getTileX(), geyser.getTileY(), UnitTypes.Zerg_Extractor.ordinal());
+		bwapi.build(worker.getID(), geyser.getTileX(), geyser.getTileY(), extractorTypeID);
 		// long deadline = bwapi.getFrameCount() + 175;
 		// Check to make sure that it actually gets constructed in the future
 		// Check to make sure that it actually gets constructed in the future
@@ -610,37 +612,20 @@ public class BuildingManager extends Manager
 		// Timeout
 		return true;
 	}
-
-	/** Builds a macro hatchery */
-	public boolean buildMacroHatchery()
-	{
-		Unit hatchery = getTownHall();
-		if (resourceManager.getMineralCount() < 300)
-		{
-			return false;
-		}
-		// No hatchery, can't do it anyways, give up
-		if (hatchery == null)
-		{
-			System.out.println("No hatchery?");
-			return false;
-		}
-		Point buildLocation = getNextBuildLocation();
-
-		if (buildBuilding(UnitTypes.Zerg_Hatchery.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-
+	
 	/**
-	 * Send drone to expansion location - Also reserves the minerals so you can
+	 * Send worker to expansion location - Also reserves the minerals so you can
 	 * actually build it.
 	 */
-	public void sendDroneToExpansionLocation()
+	public void sendWorkerToExpansionLocation()
 	{
 		BaseLocation location = expansionLocations.get(expansionIndex);
 		Unit worker = workerManager.getNearestFreeWorker(location.getTx(), location.getTy());
+		if (worker == null)
+		{
+			System.out.println("No free worker!");
+		}
+		
 		workerManager.addBusyWorker(worker.getID());
 		expansionWorker = worker.getID();
 		bwapi.move(worker.getID(), location.getX(), location.getY());
@@ -660,14 +645,14 @@ public class BuildingManager extends Manager
 			System.out.println("Go build!");
 			System.out.println("Base location " + expansionLocation.getTx() + expansionLocation.getTy());
 			Unit worker = bwapi.getUnit(expansionWorker);
-			if (buildBuilding(UnitTypes.Zerg_Hatchery.ordinal(), expansionLocation.getTx(), expansionLocation.getTy(),
+			if (buildBuilding(baseTypeID, expansionLocation.getTx(), expansionLocation.getTy(),
 					worker))
 			{
 				System.out.println("New hatchery added to expansions");
 				Unit hatchery = worker;
 				BaseInfo newExpansion = new BaseInfo(hatchery);
 				newExpansion.hatcheryWaitTimer = bwapi.getFrameCount();
-				baseHatcheries.add(newExpansion);
+				baseBuildings.add(newExpansion);
 				expansionIDs.add(hatchery.getID());
 				expansionWorker = Utility.NOT_SET;
 				resourceManager.reserveMinerals(0);
@@ -681,7 +666,6 @@ public class BuildingManager extends Manager
 		}
 		catch (Exception e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
@@ -713,7 +697,7 @@ public class BuildingManager extends Manager
 	 */
 	private void checkForBuildLocationRemoval(int unitID)
 	{
-		for (BaseInfo info : baseHatcheries)
+		for (BaseInfo info : baseBuildings)
 		{
 			if (info.id == unitID)
 			{
@@ -722,18 +706,6 @@ public class BuildingManager extends Manager
 				{
 					buildLocations.remove(index);
 					System.out.println("TEST: Removing build locations");
-				}
-			}
-		}
-		for (BaseInfo info : creepColonies)
-		{
-			if (info.id == unitID)
-			{
-				System.out.println("TEST: Creep colony destroyed!");
-				for (int index : info.buildingIndexes)
-				{
-					buildLocations.remove(index);
-					System.out.println("TEST : Removing colony build locations");
 				}
 			}
 		}
@@ -753,166 +725,22 @@ public class BuildingManager extends Manager
 		nextExpansionLocation = (nextExpansionLocation + 1) % expansionLocations.size();
 		return location;
 	}
-
-	/** Builds a spire */
-	public boolean buildSpire()
-	{
-		if (resourceManager.getMineralCount() < 200 || resourceManager.getGasCount() < 200)
-		{
-			return false;
-		}
-		if (!hasLair(true))
-		{
-			return false;
-		}
-
-		Point buildLocation = getNextBuildLocation();
-
-		if (buildBuilding(UnitTypes.Zerg_Spire.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-
-	/** Builds a spawning pool! */
-	public boolean buildSpawningPool()
-	{
-
-		Unit hatchery = getTownHall();
-		if (resourceManager.getMineralCount() < 200)
-		{
-			return false;
-		}
-		// No hatchery, can't do it anyways, give up
-		if (hatchery == null)
-		{
-			return false;
-		}
-
-		Point buildLocation = getNextBuildLocation();
-
-		if (buildBuilding(UnitTypes.Zerg_Spawning_Pool.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-
-	/** Builds a hydralisk den */
-	public boolean buildHydraliskDen()
-	{
-		Unit pool = unitManager.getMyUnitOfType(UnitTypes.Zerg_Spawning_Pool.ordinal(), true);
-		if (resourceManager.getMineralCount() < 100 || resourceManager.getGasCount() < 50)
-		{
-			return false;
-		}
-		// No spawning pool, can't do it anyways, give up
-		if (pool == null)
-		{
-			return false;
-		}
-
-		Point buildLocation = getNextBuildLocation();
-
-		if (buildBuilding(UnitTypes.Zerg_Hydralisk_Den.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-
-	public boolean buildEvolutionChamber()
-	{
-		Unit hatchery = getTownHall();
-		if (resourceManager.getMineralCount() < 75)
-		{
-			return false;
-		}
-		// No hatchery, can't do it anyways, give up
-		if (hatchery == null)
-		{
-			return false;
-		}
-
-		Point buildLocation = getNextBuildLocation();
-
-		if (buildBuilding(UnitTypes.Zerg_Evolution_Chamber.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-
-	/** Builds a creep colony ! */
-	public boolean buildCreepColony()
-	{
-		Unit hatchery = getTownHall();
-		if (resourceManager.getMineralCount() < 75)
-		{
-			return false;
-		}
-		// No hatchery, can't do it anyways, give up
-		if (hatchery == null)
-		{
-			return false;
-		}
-
-		Point buildLocation = getNextDefenceLocation();
-
-		if (buildBuilding(UnitTypes.Zerg_Creep_Colony.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-
-	public int getCompletedColonyCount()
-	{
-		return unitManager.getUnitCount(UnitTypes.Zerg_Creep_Colony.ordinal(), true) + getSunkenColonyCount();
-	}
-
-	public int getCompletedCreepColonyCount()
-	{
-		return unitManager.getUnitCount(UnitTypes.Zerg_Creep_Colony.ordinal(), true);
-	}
-
-	/** Upgrades a random creep colony to sunken colony */
-	public boolean upgradeSunkenColony()
-	{
-		Unit creep = unitManager.getMyUnitOfType(UnitTypes.Zerg_Creep_Colony.ordinal(), true);
-		if (creep == null)
-		{
-			return false;
-		}
-		if (!hasSpawningPool(true))
-		{
-			return false;
-		}
-		if (resourceManager.getMineralCount() < 50)
-		{
-			return false;
-		}
-		bwapi.morph(creep.getID(), UnitTypes.Zerg_Sunken_Colony.ordinal());
-		return true;
-	}
-
-	public int getSunkenColonyCount()
-	{
-		return unitManager.getUnitCount(UnitTypes.Zerg_Sunken_Colony.ordinal(), false);
-	}
-
+	
 	public int getExtractorCount()
 	{
-		return unitManager.getUnitCount(UnitTypes.Zerg_Extractor.ordinal(), false);
+		return unitManager.getUnitCount(extractorTypeID, false);
 	}
 
 	/** Do we have one extractor for each base? */
 	public boolean hasExtractorSaturation()
 	{
-		return unitManager.getUnitCount(UnitTypes.Zerg_Extractor.ordinal(), false) >= (expansionIDs.size() + 1);
+		return unitManager.getUnitCount(extractorTypeID, false) >= (expansionIDs.size() + 1);
 	}
 
 	/** have all the extractors been completed? */
 	public boolean allExtractorsCompleted()
 	{
-		return (unitManager.getUnitCount(UnitTypes.Zerg_Extractor.ordinal(), false)) == (unitManager.getUnitCount(
-				UnitTypes.Zerg_Extractor.ordinal(), true));
+		return (unitManager.getUnitCount(extractorTypeID, false)) == (unitManager.getUnitCount(extractorTypeID, true));
 	}
 
 	/** Determines the direction of a hatchery to another building */
@@ -1022,15 +850,17 @@ public class BuildingManager extends Manager
 	 * 
 	 * @return Returns a Hive unit, Lair unit, or Hatchery unit.
 	 */
-	private Unit getTownHall()
+	protected Unit getTownHall()
 	{
 		Unit hall = null;
-		hall = unitManager.getMyUnitOfType(UnitTypes.Zerg_Hive.ordinal(), false);
-		if (hall == null)
+		hall = unitManager.getMyUnitOfType(baseTypeID, false);
+		
+		// Zerg can upgrade thier bases
+		if (hall == null && bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal())
 		{
 			hall = unitManager.getMyUnitOfType(UnitTypes.Zerg_Lair.ordinal(), false);
 		}
-		if (hall == null)
+		if (hall == null && bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal())
 		{
 			hall = unitManager.getMyUnitOfType(UnitTypes.Zerg_Hatchery.ordinal(), false);
 		}
@@ -1102,27 +932,6 @@ public class BuildingManager extends Manager
 
 	}
 
-	/** Upgrades a hatchery to a lair */
-	public boolean upgradeToLair()
-	{
-		Unit hatchery = unitManager.getMyUnitOfType(UnitTypes.Zerg_Hatchery.ordinal(), true);
-		;
-		if (hatchery == null)
-		{
-			return false;
-		}
-		if (!hasSpawningPool(true))
-		{
-			return false;
-		}
-		if (resourceManager.getMineralCount() < 150 || resourceManager.getGasCount() < 100)
-		{
-			return false;
-		}
-		bwapi.morph(hatchery.getID(), UnitTypes.Zerg_Lair.ordinal());
-		return true;
-	}
-
 	/**
 	 * Returns whether the AI has built an extractor yet.
 	 * 
@@ -1134,97 +943,8 @@ public class BuildingManager extends Manager
 	public boolean hasExtractor(boolean completed)
 	{
 		// Find the nearest Zerg Extractor
-		Unit extractor = unitManager.getMyUnitOfType(UnitTypes.Zerg_Extractor.ordinal(), completed);
+		Unit extractor = unitManager.getMyUnitOfType(extractorTypeID, completed);
 		if (extractor == null)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
-
-	/**
-	 * Returns whether the AI has built an extractor yet.
-	 * 
-	 * @param completed
-	 *            If true, will return false if the building is still in
-	 *            progress
-	 * @return
-	 */
-	public boolean hasSpawningPool(boolean completed)
-	{
-		// Find a pool
-		Unit pool = unitManager.getMyUnitOfType(UnitTypes.Zerg_Spawning_Pool.ordinal(), completed);
-		if (pool == null)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
-
-	/**
-	 * Checks whether there is a lair in progress, or completed
-	 * 
-	 * @param completed
-	 *            If true, will return false if the building is still in
-	 *            progress
-	 * @return
-	 */
-	public boolean hasLair(boolean completed)
-	{
-		Unit lair = null;
-		lair = unitManager.getMyUnitOfType(UnitTypes.Zerg_Lair.ordinal(), completed);
-		if (lair == null)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
-
-	/**
-	 * Checks whether there is a hydralisk den built.
-	 * 
-	 * @param completed
-	 *            If true, will return false if the building is still in
-	 *            progress
-	 * @return
-	 */
-	public boolean hasHydraliskDen(boolean completed)
-	{
-		Unit den = null;
-		den = unitManager.getMyUnitOfType(UnitTypes.Zerg_Hydralisk_Den.ordinal(), completed);
-		if (den == null)
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-
-	}
-
-	/**
-	 * Checks whether there is a spire
-	 * 
-	 * @param completed
-	 *            If true, will return false if the building is still in
-	 *            progress
-	 * @return
-	 */
-	public boolean hasSpire(boolean completed)
-	{
-		Unit spire = null;
-		spire = unitManager.getMyUnitOfType(UnitTypes.Zerg_Spire.ordinal(), completed);
-		if (spire == null)
 		{
 			return false;
 		}
@@ -1243,9 +963,14 @@ public class BuildingManager extends Manager
 		int count = 0;
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			if (unit.getTypeID() == UnitTypes.Zerg_Hatchery.ordinal()
-					|| unit.getTypeID() == UnitTypes.Zerg_Lair.ordinal()
-					|| unit.getTypeID() == UnitTypes.Zerg_Hive.ordinal())
+			if (unit.getTypeID() == baseTypeID)		
+			{
+				count++;
+			}
+			// Darn zerg and their upgrading town halls
+			else if (bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal()	&&
+						(unit.getTypeID() == UnitTypes.Zerg_Lair.ordinal()		||
+						unit.getTypeID() == UnitTypes.Zerg_Hive.ordinal()		))
 			{
 				count++;
 			}
@@ -1256,18 +981,6 @@ public class BuildingManager extends Manager
 	public int getExpansionCount()
 	{
 		return expansionIDs.size();
-	}
-
-	/**
-	 * Get the number of evolution chambers
-	 * 
-	 * @param completed
-	 *            If true, will only count completed evolution chambers
-	 * @return
-	 */
-	public int getEvolutionChamberCount(boolean completed)
-	{
-		return unitManager.getUnitCount(UnitTypes.Zerg_Evolution_Chamber.ordinal(), true);
 	}
 
 	@Override
@@ -1284,52 +997,26 @@ public class BuildingManager extends Manager
 			bwapi.drawText(new Point(320, 0), "Next build location: " + nextBuildLocation, true);
 			bwapi.drawText(new Point(320, 16), "Next defence location : " + nextDefenceLocation, true);
 		}
-		checkForCompletedColonies();
 		checkCompletedHatcheries();
-	}
-
-	private void checkForCompletedColonies()
-	{
-		for (Unit unit : bwapi.getAllUnits())
-		{
-			if (bwapi.getUnitType(unit.getTypeID()).isBuilding())
-			{
-
-				// Check for colonies
-				// if the colony is completed
-				// and has not already been added, then add it to the base infos
-				if ((unit.getTypeID() == UnitTypes.Zerg_Creep_Colony.ordinal() || unit.getTypeID() == UnitTypes.Zerg_Sunken_Colony
-						.ordinal())
-						&& unit.getPlayerID() == bwapi.getSelf().getID()
-						&& unit.isCompleted()
-						&& !colonyInfoExists(unit.getID()))
-				{
-					BaseInfo newColony = new BaseInfo(unit);
-					calculateBuildLocationsColony(newColony, getTownHall());
-					creepColonies.add(newColony);
-					System.out.println("New colony made!");
-				}
-			}
-		}
 	}
 
 	private void checkCompletedHatcheries()
 	{
-		for (BaseInfo base : baseHatcheries)
+		for (BaseInfo base : baseBuildings)
 		{
 			if (base.updated)
 			{
 				continue;
 			}
 			// Make sure it is actually a hatchery first
-			if (base.structure.getTypeID() == UnitTypes.Zerg_Hatchery.ordinal())
+			if (base.structure.getTypeID() == baseTypeID)
 			{
 				// Update information, has now been completed
 				if (base.structure.isCompleted() && !base.completed)
 				{
 					base.completed = true;
 					base.hatcheryWaitTimer = bwapi.getFrameCount();
-					calculateBuildLocationsHatchery(base);
+					calculateBuildLocationsForBase(base);
 				}
 				if (base.completed && !base.updated && bwapi.getFrameCount() > base.hatcheryWaitTimer + 100)
 				{
@@ -1351,28 +1038,16 @@ public class BuildingManager extends Manager
 					// Force expansion to be made again!
 					expansionWorker = base.id;
 					buildExpansionHatchery();
-					baseHatcheries.remove(base);
+					baseBuildings.remove(base);
 					break;
 				}
 			}
 		}
 	}
 
-	private boolean colonyInfoExists(int unitID)
-	{
-		for (BaseInfo info : creepColonies)
-		{
-			if (info.id == unitID)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private boolean hatcheryInfoExists(int unitID)
 	{
-		for (BaseInfo info : baseHatcheries)
+		for (BaseInfo info : baseBuildings)
 		{
 			if (info.id == unitID)
 			{
@@ -1389,7 +1064,7 @@ public class BuildingManager extends Manager
 		buildingsList.clear();
 		buildLocations.clear();
 		expansionLocations.clear();
-		baseHatcheries.clear();
+		baseBuildings.clear();
 		// Start build locations from 0
 		nextBuildLocation = 0;
 		expansionIndex = 0;
@@ -1409,10 +1084,10 @@ public class BuildingManager extends Manager
 				addBuildingToKnowldegeBase(unit.getTypeID(), unit);
 			}
 		}
-		BaseInfo mainBase = new BaseInfo(unitManager.getMyUnitOfType(UnitTypes.Zerg_Hatchery.ordinal()), true);
-		baseHatcheries.add(mainBase);
-		calculateBuildLocationsHatchery(mainBase);
-		calculateExpansionLocations(unitManager.getMyUnitOfType(UnitTypes.Zerg_Hatchery.ordinal()));
+		BaseInfo mainBase = new BaseInfo(unitManager.getMyUnitOfType(baseTypeID), true);
+		baseBuildings.add(mainBase);
+		calculateBuildLocationsForBase(mainBase);
+		calculateExpansionLocations(unitManager.getMyUnitOfType(baseTypeID));
 	}
 
 	@Override
