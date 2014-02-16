@@ -2,6 +2,7 @@ package scbod;
 
 import java.util.ArrayList;
 
+import scbod.Utility.CommonUnitType;
 import jnibwapi.BWAPIEventListener;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
@@ -24,13 +25,14 @@ public class AIClient implements BWAPIEventListener, Runnable
 	/** Managers */
 	private ArrayList<Manager>	managers;
 	public ResourceManager		resourceManager;
-	public ZergProductionManager	productionManager;
+	public ProductionManager	productionManager;
 	public IntelligenceManager	intelligenceManager;
 	public UnitManager			unitManager;
 	public WorkerManager		workerManager;
 	public BuildingManager		buildingManager;
 	public UpgradeManager		upgradeManager;
 	public MilitaryManager		militaryManager;
+	public ScoutManager			scoutManager;
 
 	/** Is the game currently playing? */
 	private boolean				gameStarted;
@@ -100,22 +102,23 @@ public class AIClient implements BWAPIEventListener, Runnable
 	{
 		System.out.println("Game Started");
 		gameStarted = true;
+		Utility.setRace(RaceTypes.values()[bwapi.getSelf().getRaceID()]);
 
 		// Create managers
-		resourceManager = new ResourceManager(bwapi);
-		unitManager = new UnitManager(bwapi);
-		workerManager = new WorkerManager(bwapi);
-		intelligenceManager = new IntelligenceManager(bwapi, unitManager, workerManager);
+		resourceManager		= new ResourceManager(bwapi);
+		unitManager			= new UnitManager(bwapi);
+		workerManager		= new WorkerManager(bwapi);
+		scoutManager		= new ScoutManager(bwapi);
 		
 		if (bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal())
 		{
-			buildingManager = new ZergBuildingManager(bwapi, unitManager, workerManager, resourceManager);
-			productionManager = new ZergProductionManager(bwapi, resourceManager, buildingManager);
+			intelligenceManager	= new ZergIntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
+			buildingManager		= new ZergBuildingManager(bwapi, unitManager, workerManager, resourceManager);
+			productionManager	= new ZergProductionManager(bwapi, resourceManager, buildingManager);
+			militaryManager		= new ZergMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
+			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager);
 		}
 		
-		
-		upgradeManager = new UpgradeManager(bwapi, unitManager, resourceManager);
-		militaryManager = new MilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
 
 		// Add managers to the call list
 		// All managers added here will have their associated
@@ -166,15 +169,11 @@ public class AIClient implements BWAPIEventListener, Runnable
 
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			if (unit.getTypeID() == workerManager.getWorkerTypeID())
+			if (unit.isIdle())
 			{
-				if (unit.isIdle())
+				if (!scoutManager.idleScout(unit.getID()))
 				{
-					if (unit.getID() == intelligenceManager.getScoutDroneID())
-					{
-						intelligenceManager.moveScoutDroneToNextLocation(unit);
-					}
-					else
+					if (unit.getTypeID() == Utility.getCommonTypeID(CommonUnitType.Worker))
 					{
 						workerManager.idleWorker(unit);
 					}
