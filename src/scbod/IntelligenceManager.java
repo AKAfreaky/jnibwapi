@@ -11,128 +11,149 @@ import jnibwapi.model.Player;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;
 
-/** Handles the tasks of scouting and what areas have been scouted,
- * and where the enemy is located. 
- *
+/**
+ * Handles the tasks of scouting and what areas have been scouted, and where the
+ * enemy is located.
+ * 
  */
-public class IntelligenceManager extends Manager {
-	
-	
+public class IntelligenceManager extends Manager
+{
+
 	// Start Locations
 	// enemyStartLocation starts as unknown
-	private BaseLocation enemyStartLocation;
-	private BaseLocation startLocation;
-	
-	private int overlordScoutIndex;
-	
-	public BaseLocation getEnemyStartLocation(){
+	private BaseLocation	enemyStartLocation;
+	private BaseLocation	startLocation;
+
+	//TODO: Zerg Specific
+	private int				overlordScoutIndex;
+
+	public BaseLocation getEnemyStartLocation()
+	{
 		return enemyStartLocation;
 	}
-	
-	public BaseLocation getPlayerStartLocation(){
+
+	public BaseLocation getPlayerStartLocation()
+	{
 		return startLocation;
 	}
-	
+
 	/* Base locations that are not the player start locations, used for scouting */
-	private ArrayList<BaseLocation> scoutLocations = new ArrayList<BaseLocation>();
-	
+	private ArrayList<BaseLocation>	scoutLocations			= new ArrayList<BaseLocation>();
+
 	/* Known building locations */
-	private ArrayList<BuildingInfo> enemyBuildingLocations = new ArrayList<BuildingInfo>();
-	
-	
+	private ArrayList<BuildingInfo>	enemyBuildingLocations	= new ArrayList<BuildingInfo>();
+
 	/* * * Drone Scouting * * */
-	private boolean scoutingDrone;
-	
+	private boolean					scoutingDrone;
+
 	/** ID of the scouting drone */
-	private int scoutDroneID;
-	
-	public int getScoutDroneID() {
+	private int						scoutDroneID;
+
+	public int getScoutDroneID()
+	{
 		return scoutDroneID;
 	}
-	
+
 	/** Which location should the scout drone go to next? */
-	private int nextScoutLocation;
-	
+	private int					nextScoutLocation;
+
 	/* Nearest base. Overlord goes here, scout drone avoids this */
-	private BaseLocation nearestBase;
-	
-	private JNIBWAPI bwapi;
-	private WorkerManager workerManager;
-	private UnitManager unitManager;
-	
+	private BaseLocation		nearestBase;
+
+	private JNIBWAPI			bwapi;
+	private WorkerManager		workerManager;
+	private UnitManager			unitManager;
+
 	// Enemy players ID
-	private ArrayList<Integer> enemyPlayersID = new ArrayList<Integer>();
-	private ChokePoint enemyChokePoint = null;
-	
-	public IntelligenceManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager){
+	private ArrayList<Integer>	enemyPlayersID	= new ArrayList<Integer>();
+	private ChokePoint			enemyChokePoint	= null;
+
+	public IntelligenceManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager)
+	{
 		this.bwapi = bwapi;
 		this.workerManager = workerManager;
 		this.unitManager = unitManager;
 	}
+
 	/** Sends a drone to go scout all of the base locations for the enemy */
-	public boolean scoutDrone(){
+	public boolean scoutDrone()
+	{
 		// Find a drone
 		Unit worker = null;
-		for (Unit unit : bwapi.getMyUnits()) {
-			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal() &&
-					!workerManager.isWorkerBusy(unit.getID())) {
+		for (Unit unit : bwapi.getMyUnits())
+		{
+			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal() && !workerManager.isWorkerBusy(unit.getID()))
+			{
 				worker = unit;
 				break;
 			}
 		}
 		// No worker found
-		if(worker == null){
+		if (worker == null)
+		{
 			return false;
 		}
-		
+
 		workerManager.addBusyWorker(worker.getID());
 		scoutDroneID = worker.getID();
 		scoutingDrone = true;
 		nextScoutLocation = 0;
-		
+
 		sendScoutDroneToNextLocation();
-		
+
 		return true;
 	}
-	
+
+	//TODO: Zerg Specific
 	/** Sends an overlord to go scout all of the base locations for the enemy */
-	public void scoutOverlord(int unitID){
+	public void scoutOverlord(int unitID)
+	{
 		BaseLocation scoutLocation = bwapi.getMap().getBaseLocations().get(overlordScoutIndex);
-		if(scoutLocation.equals(getPlayerStartLocation())){
+		if (scoutLocation.equals(getPlayerStartLocation()))
+		{
 			incrementOverlordScout();
 			scoutLocation = bwapi.getMap().getBaseLocations().get(overlordScoutIndex);
 		}
 		bwapi.move(unitID, scoutLocation.getX(), scoutLocation.getY());
 		incrementOverlordScout();
 	}
-	
-	private void incrementOverlordScout() {
+
+	//TODO: Zerg Specific
+	private void incrementOverlordScout()
+	{
 		overlordScoutIndex = (overlordScoutIndex + 1) % bwapi.getMap().getBaseLocations().size();
 	}
-	
-	
-	private void sendScoutDroneToNextLocation(){
-		
-		if(scoutDroneID == Utility.NOT_SET){
+
+	private void sendScoutDroneToNextLocation()
+	{
+
+		if (scoutDroneID == Utility.NOT_SET)
+		{
 			return;
 		}
-		bwapi.move(scoutDroneID, scoutLocations.get(nextScoutLocation).getX(),
-				scoutLocations.get(nextScoutLocation).getY());
+		bwapi.move(scoutDroneID, scoutLocations.get(nextScoutLocation).getX(), scoutLocations.get(nextScoutLocation)
+				.getY());
 	}
-	
-	/** Gets the closest choke point to the enemy base.
-	 * Calculates it the first time it is called, then saves it for later calls.
+
+	/**
+	 * Gets the closest choke point to the enemy base. Calculates it the first
+	 * time it is called, then saves it for later calls.
+	 * 
 	 * @return
 	 */
-	public ChokePoint getEnemyChokePoint(){
-		if(enemyChokePoint  == null && foundEnemyBase()){
+	public ChokePoint getEnemyChokePoint()
+	{
+		if (enemyChokePoint == null && foundEnemyBase())
+		{
 			List<ChokePoint> chokePoints = bwapi.getMap().getChokePoints();
 			ChokePoint closestLocation = null;
 			double smallestDistance = Utility.NOT_SET;
-			for(ChokePoint location: chokePoints){
+			for (ChokePoint location : chokePoints)
+			{
 				double baseDistance = Utility.getDistance(enemyStartLocation.getX(), enemyStartLocation.getY(),
 						location.getCenterX(), location.getCenterY());
-				if(closestLocation == null || baseDistance < smallestDistance){
+				if (closestLocation == null || baseDistance < smallestDistance)
+				{
 					closestLocation = location;
 					smallestDistance = baseDistance;
 				}
@@ -141,18 +162,21 @@ public class IntelligenceManager extends Manager {
 		}
 		return enemyChokePoint;
 	}
-	
-	public void setBaseLocations(){
+
+	public void setBaseLocations()
+	{
 		// Set enemy ID
 		// get hatchery
 		Unit hatchery = unitManager.getMyUnitOfType(UnitTypes.Zerg_Hatchery.ordinal());
 		/* Get player locations */
-		for(BaseLocation location : bwapi.getMap().getBaseLocations()){
-			if(location.isStartLocation()
-					//&& TODO:
-//					(location.getTx() != hatchery.getTileX() &&
-//					location.getTy() != hatchery.getTileY())
-				){
+		for (BaseLocation location : bwapi.getMap().getBaseLocations())
+		{
+			if (location.isStartLocation()
+			// && TODO:
+			// (location.getTx() != hatchery.getTileX() &&
+			// location.getTy() != hatchery.getTileY())
+			)
+			{
 				scoutLocations.add(location);
 			}
 		}
@@ -160,10 +184,12 @@ public class IntelligenceManager extends Manager {
 		// Remove the smallest one
 		BaseLocation closestLocation = null;
 		double smallestDistance = Utility.NOT_SET;
-		for(BaseLocation location: scoutLocations){
-			double baseDistance = Utility.getDistance(hatchery.getX(), hatchery.getY(),
-					location.getX(), location.getY());
-			if(closestLocation == null || baseDistance < smallestDistance){
+		for (BaseLocation location : scoutLocations)
+		{
+			double baseDistance = Utility.getDistance(hatchery.getX(), hatchery.getY(), location.getX(),
+					location.getY());
+			if (closestLocation == null || baseDistance < smallestDistance)
+			{
 				closestLocation = location;
 				smallestDistance = baseDistance;
 			}
@@ -173,40 +199,49 @@ public class IntelligenceManager extends Manager {
 		startLocation = closestLocation;
 		scoutLocations.remove(closestLocation);
 		nearestBase = getNearestBaseLocation(startLocation.getX(), startLocation.getY());
-		// Remove the nearest location, then add it again, so it is at the end of the queue,
+		// Remove the nearest location, then add it again, so it is at the end
+		// of the queue,
 		// as overlord will scout this.
 		scoutLocations.remove(nearestBase);
 		scoutLocations.add(nearestBase);
 	}
-	
-	public Point getClosestKnownEnemyLocation(Point location){
+
+	public Point getClosestKnownEnemyLocation(Point location)
+	{
 		ArrayList<Point> points = new ArrayList<Point>();
-		for(BuildingInfo building : enemyBuildingLocations){
+		for (BuildingInfo building : enemyBuildingLocations)
+		{
 			points.add(building.location);
 		}
 		return Utility.getClosestLocation(points, location);
 	}
-	
-	public int getEnemyBuildingLocationCount(){
+
+	public int getEnemyBuildingLocationCount()
+	{
 		return enemyBuildingLocations.size();
 	}
-	
-	/** Returns the nearest non-player start location to the given coordinates.
+
+	/**
+	 * Returns the nearest non-player start location to the given coordinates.
 	 * 
-	 * @return The nearest start location from the given coordiantes that is not the
-	 * players spawn.
+	 * @return The nearest start location from the given coordiantes that is not
+	 *         the players spawn.
 	 */
-	private BaseLocation getNearestBaseLocation(int x, int y){
-		if(scoutLocations == null){
+	private BaseLocation getNearestBaseLocation(int x, int y)
+	{
+		if (scoutLocations == null)
+		{
 			return null;
 		}
-		else{
+		else
+		{
 			BaseLocation closest = null;
 			double closestDistance = Utility.NOT_SET;
-			for(BaseLocation location : scoutLocations){
-				double distance = Utility.getDistance(x, y, 
-						location.getX(), location.getY());
-				if(closest == null || distance < closestDistance){
+			for (BaseLocation location : scoutLocations)
+			{
+				double distance = Utility.getDistance(x, y, location.getX(), location.getY());
+				if (closest == null || distance < closestDistance)
+				{
 					closest = location;
 					closestDistance = distance;
 				}
@@ -214,72 +249,90 @@ public class IntelligenceManager extends Manager {
 			return closest;
 		}
 	}
-	
-	public void gameStarted(){
+
+	public void gameStarted()
+	{
 		scoutingDrone = false;
 		overlordScoutIndex = 0;
 		enemyStartLocation = null;
 		enemyPlayersID.clear();
 		// Add all the enemy player IDs to the enemyPlayersID array
-		for(Player player : bwapi.getEnemies()){
+		for (Player player : bwapi.getEnemies())
+		{
 			enemyPlayersID.add(player.getID());
 			System.out.println("New enemy :" + player.getID());
 		}
 		setBaseLocations();
 		scoutOverlord(unitManager.getMyUnitOfType(UnitTypes.Zerg_Overlord.ordinal()).getID());
 	}
-	
-	public void gameUpdate(){
-		if(AIClient.DEBUG){
+
+	public void gameUpdate()
+	{
+		if (AIClient.DEBUG)
+		{
 			int i = 0;
-			for(BaseLocation location : scoutLocations){
+			for (BaseLocation location : scoutLocations)
+			{
 				bwapi.drawDot(location.getX(), location.getY(), 0x04, false);
 				bwapi.drawText(location.getX(), location.getY(), "Scout Location : " + i, false);
 				i++;
 			}
-			bwapi.drawText(0,32, "Base located? " + foundEnemyBase(), true);
-			bwapi.drawText(0,48, "isScouting? " + isScouting(), true);
+			bwapi.drawText(0, 32, "Base located? " + foundEnemyBase(), true);
+			bwapi.drawText(0, 48, "isScouting? " + isScouting(), true);
 		}
-		
+
 		// keep the overlords scouting dawg
-		for(Unit unit : bwapi.getMyUnits()){
-			if(unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal()){
-				if(unit.getHitPoints() < 185){
+		for (Unit unit : bwapi.getMyUnits())
+		{
+			if (unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal())
+			{
+				if (unit.getHitPoints() < 185)
+				{
 					bwapi.move(unit.getID(), startLocation.getX(), startLocation.getY());
 				}
-				else if(unit.isIdle()){
+				else if (unit.isIdle())
+				{
 					scoutOverlord(unit.getID());
 				}
 			}
 		}
 	}
-	
+
 	/** Returns whether the enemy base location has been foudn */
-	public boolean foundEnemyBase(){
-		if(enemyStartLocation == null){
+	public boolean foundEnemyBase()
+	{
+		if (enemyStartLocation == null)
+		{
 			return false;
 		}
-		else{
+		else
+		{
 			return true;
 		}
 	}
-	
+
 	/** Returns whether there is a drone/zergling currently scouting */
-	public boolean isScouting(){
+	public boolean isScouting()
+	{
 		return scoutingDrone;
 	}
-	
-	/* Moves the scouting drone to the next location, or returns it to base
-	 * if the scouting has been complete.
+
+	/*
+	 * Moves the scouting drone to the next location, or returns it to base if
+	 * the scouting has been complete.
 	 */
-	public void moveScoutDroneToNextLocation(Unit unit){
+	public void moveScoutDroneToNextLocation(Unit unit)
+	{
 		// Is scouting complete?
-		if(++nextScoutLocation < scoutLocations.size() - 1){
+		if (++nextScoutLocation < scoutLocations.size() - 1)
+		{
 			// move to next base
 			sendScoutDroneToNextLocation();
 		}
-		else{
-			if(!foundEnemyBase()){
+		else
+		{
+			if (!foundEnemyBase())
+			{
 				enemyStartLocation = scoutLocations.get(nextScoutLocation);
 			}
 			// stop scouting
@@ -289,24 +342,28 @@ public class IntelligenceManager extends Manager {
 			bwapi.move(scoutDroneID, hatchery.getX(), hatchery.getY());
 			scoutDroneID = Utility.NOT_SET;
 			workerManager.removeBusyWorker(unit.getID());
-			
+
 		}
 	}
-	
-	/** On discovering a building, add it to the knowledge base, and if scouting return
-	 * the scout to base.
+
+	/**
+	 * On discovering a building, add it to the knowledge base, and if scouting
+	 * return the scout to base.
 	 */
-	public void unitDiscover(int unitID){
+	public void unitDiscover(int unitID)
+	{
 		Unit unit = bwapi.getUnit(unitID);
 		// Is this an enemy building?
-		if(enemyPlayersID.contains(unit.getPlayerID())
-				&& bwapi.getUnitType(unit.getTypeID()).isBuilding()){
+		if (enemyPlayersID.contains(unit.getPlayerID()) && bwapi.getUnitType(unit.getTypeID()).isBuilding())
+		{
 			enemyBuildingLocations.add(new BuildingInfo(unit, bwapi));
-			if(enemyStartLocation == null){
+			if (enemyStartLocation == null)
+			{
 				enemyStartLocation = getNearestBaseLocation(unit.getX(), unit.getY());
-				
+
 				// Have scout drone go home
-				if(scoutingDrone){
+				if (scoutingDrone)
+				{
 					scoutingDrone = false;
 					bwapi.move(scoutDroneID, startLocation.getX(), startLocation.getY());
 					workerManager.removeBusyWorker(scoutDroneID);
@@ -315,35 +372,44 @@ public class IntelligenceManager extends Manager {
 			}
 		}
 	}
-	
-	public void unitMorph(int unitID){
-		for(BuildingInfo info : enemyBuildingLocations){
+
+	public void unitMorph(int unitID)
+	{
+		for (BuildingInfo info : enemyBuildingLocations)
+		{
 			// Remove the building the knowledge base
-			if(info.id == unitID){
+			if (info.id == unitID)
+			{
 				System.out.println("Removed enemy building location");
 				enemyBuildingLocations.remove(info);
 				break;
 			}
 		}
 		Unit unit = bwapi.getUnit(unitID);
-		if(unit.getPlayerID() == bwapi.getSelf().getID()){
-			if(unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal()){
-				 scoutOverlord(unitID);
+		if (unit.getPlayerID() == bwapi.getSelf().getID())
+		{
+			if (unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal())
+			{
+				scoutOverlord(unitID);
 			}
 		}
 	}
-	
-	public void unitDestroy(int unitID){
+
+	public void unitDestroy(int unitID)
+	{
 		// Check if building is in the knowledge base
-		for(BuildingInfo info : enemyBuildingLocations){
+		for (BuildingInfo info : enemyBuildingLocations)
+		{
 			// Remove the building the knowledge base
-			if(info.id == unitID){
+			if (info.id == unitID)
+			{
 				System.out.println("Removed enemy building location");
 				enemyBuildingLocations.remove(info);
 				break;
 			}
 		}
-		if(unitID == scoutDroneID){
+		if (unitID == scoutDroneID)
+		{
 			scoutingDrone = false;
 		}
 	}
