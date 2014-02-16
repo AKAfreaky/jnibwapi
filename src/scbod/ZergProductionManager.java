@@ -6,7 +6,7 @@ import jnibwapi.types.TechType.TechTypes;
 import jnibwapi.types.UnitType.UnitTypes;
 
 /** Handles the spawning and production of new units */
-public class ZergProductionManager extends Manager
+public class ZergProductionManager extends ProductionManager
 {
 
 	private ResourceManager		resourceManager;
@@ -182,6 +182,30 @@ public class ZergProductionManager extends Manager
 		// Update the resource manager with the number of overlords in
 		// production
 		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal() + (8 * getOverlordsInProduction()));
+	}
+
+	@Override
+	public boolean spawn(UnitTypes unitType)
+	{
+		switch(unitType)
+		{
+			case Zerg_Drone:
+				return spawnDrone();
+			case Zerg_Hydralisk:
+				return spawnHydralisk();
+			case Zerg_Lurker:
+				return spawnLurker();				
+			case Zerg_Mutalisk:
+				return spawnMutalisk();				
+			case Zerg_Overlord:
+				return spawnOverlord();
+			case Zerg_Zergling:
+				return spawnZerglings();
+			default:
+				System.out.println("Can't spawn that unit!");
+				break;
+		}
+		return false;
 	}
 
 }
