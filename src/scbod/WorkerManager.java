@@ -40,7 +40,7 @@ public class WorkerManager extends Manager
 
 	/** The type ID of the worker unit for the current race */
 	private int								workerTypeID;
-	
+
 	/** The type ID of the base building for the current race */
 	private int								baseTypeID;
 
@@ -106,12 +106,12 @@ public class WorkerManager extends Manager
 			for (int i = extractor.gasWorkers.size(); i < 3; i++)
 			{
 				worker = getNearestFreeWorker(extractorUnit.getX(), extractorUnit.getY());
-				
+
 				if (worker == null)
 				{
 					return false;
 				}
-				bwapi.rightClick(worker.getID(), extractorUnit.getID());
+				bwapi.gather(worker.getID(), extractorUnit.getID());
 				globalGasWorkers.add(worker.getID());
 				extractor.gasWorkers.add(worker.getID());
 			}
@@ -126,12 +126,9 @@ public class WorkerManager extends Manager
 		// Find the nearest drone
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			if (unit.getTypeID() == workerTypeID
-					&& !isWorkerBusy(unit.getID())
-					&& !isGasWorker(unit.getID()))
+			if (unit.getTypeID() == workerTypeID && !isWorkerBusy(unit.getID()) && !isGasWorker(unit.getID()))
 			{
-				double workerDistance = Utility.getDistance(tileX, tileY,
-						unit.getTileX(), unit.getTileY());
+				double workerDistance = Utility.getDistance(tileX, tileY, unit.getTileX(), unit.getTileY());
 				if (worker == null || workerDistance < currentShortestDistance)
 				{
 					worker = unit;
@@ -139,7 +136,7 @@ public class WorkerManager extends Manager
 				}
 			}
 		}
-		
+
 		return worker;
 	}
 
@@ -194,7 +191,7 @@ public class WorkerManager extends Manager
 		globalGasWorkers.clear();
 		workers.clear();
 		workerTypeID = Utility.getCommonTypeID(CommonUnitType.Worker);
-		baseTypeID	 = Utility.getCommonTypeID(CommonUnitType.Base);
+		baseTypeID = Utility.getCommonTypeID(CommonUnitType.Base);
 
 		for (Unit unit : bwapi.getMyUnits())
 		{
@@ -205,7 +202,7 @@ public class WorkerManager extends Manager
 
 			if (unit.getTypeID() == baseTypeID)
 			{
-				newBaseBuilding(new BaseInfo(unit));	
+				newBaseBuilding(new BaseInfo(unit));
 			}
 		}
 	}
@@ -254,12 +251,10 @@ public class WorkerManager extends Manager
 			{
 				for (Unit unit : bwapi.getNeutralUnits())
 				{
-					if (unit.getTypeID() == UnitTypes.Resource_Mineral_Field
-							.ordinal())
+					if (unit.getTypeID() == UnitTypes.Resource_Mineral_Field.ordinal())
 					{
 						// Are the minerals close?
-						if (Utility.getDistance(unit.getX(), unit.getY(),
-								base.location.x, base.location.y) < 500)
+						if (Utility.getDistance(unit.getX(), unit.getY(), base.location.x, base.location.y) < 500)
 						{
 							removeMineral(unit.getID());
 						}
@@ -293,12 +288,11 @@ public class WorkerManager extends Manager
 		for (Unit unit : bwapi.getMyUnits())
 		{
 			// don't disturb the busy and the gas workers!
-			if (busyWorkers.contains(unit.getID()) || 
-				globalGasWorkers.contains(unit.getID()))
+			if (busyWorkers.contains(unit.getID()) || globalGasWorkers.contains(unit.getID()))
 			{
 				continue;
 			}
-			
+
 			if (unit.getTypeID() == workerTypeID)
 			{
 				calculateMining(unit.getID());
@@ -316,8 +310,8 @@ public class WorkerManager extends Manager
 		double lowestDistance = Utility.NOT_SET;
 		for (MineralAllocation mineral : mineralFields)
 		{
-			double distance = Utility.getDistance(worker.getX(), worker.getY(),
-					mineral.getLocation().x, mineral.getLocation().y);
+			double distance = Utility.getDistance(worker.getX(), worker.getY(), mineral.getLocation().x,
+					mineral.getLocation().y);
 			// if nothing been allocated so far, set as this one
 			// else get the one with the lowest allocation count
 			// else get the closest one with lowest allocation count
@@ -405,8 +399,7 @@ public class WorkerManager extends Manager
 			{
 				extractors.add(new ExtractorInfo(unitID));
 			}
-			if (workers.contains(unitID)
-					&& unit.getTypeID() != workerTypeID)
+			if (workers.contains(unitID) && unit.getTypeID() != workerTypeID)
 			{
 				workers.remove(Integer.valueOf(unitID));
 			}
@@ -428,36 +421,31 @@ public class WorkerManager extends Manager
 	{
 		if (AIClient.DEBUG)
 		{
-			bwapi.drawText(new Point(320, 32), "Drone Count : "
-					+ getWorkerCount(), true);
+			bwapi.drawText(new Point(320, 32), "Drone Count : " + getWorkerCount(), true);
 			bwapi.drawText(new Point(1, 40), "Current worker orders:", true);
 			int y = 60;
 			for (Unit unit : bwapi.getMyUnits())
 			{
 				if (unit.getTypeID() == workerTypeID)
 				{
-					bwapi.drawText(new Point(0, y), "Worker " + unit.getID() + ": " + unit.getOrderID(),true);
+					bwapi.drawText(new Point(0, y), "Worker " + unit.getID() + ": " + unit.getOrderID(), true);
 					y += 10;
-					
-					
+
 					// worker is lying and isn't busy, send them back to work!
 					if (isWorkerBusy(unit.getID()))
 					{
-						bwapi.drawText(unit.getX() + 2, unit.getY() + 4,
-								"Busy", false);
+						bwapi.drawText(unit.getX() + 2, unit.getY() + 4, "Busy", false);
 					}
 					if (isGasWorker(unit.getID()))
 					{
-						bwapi.drawText(unit.getX() + 2, unit.getY() + 4, "Gas",
-								false);
+						bwapi.drawText(unit.getX() + 2, unit.getY() + 4, "Gas", false);
 					}
 				}
 			}
 			// Draw minerals
 			for (MineralAllocation minerals : mineralFields)
 			{
-				bwapi.drawText(minerals.getLocation().x,
-						minerals.getLocation().y + 16,
+				bwapi.drawText(minerals.getLocation().x, minerals.getLocation().y + 16,
 						"Min: " + minerals.getDroneCount(), false);
 			}
 		}
