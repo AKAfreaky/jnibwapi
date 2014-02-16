@@ -53,7 +53,7 @@ public class BuildingManager extends Manager
 
 	// Info used for generating new building locations
 	private ArrayList<BaseInfo>		baseBuildings		= new ArrayList<BaseInfo>();
-	
+
 	/* Index for the next expansion */
 	private int						expansionIndex;
 
@@ -61,7 +61,7 @@ public class BuildingManager extends Manager
 
 	/** ID for expansion building worker */
 	private int						expansionWorker		= Utility.NOT_SET;
-	
+
 	protected int					baseTypeID;
 	protected int					extractorTypeID;
 
@@ -70,11 +70,11 @@ public class BuildingManager extends Manager
 	private int						mapSizeY;
 
 	protected JNIBWAPI				bwapi;
-	protected UnitManager				unitManager;
+	protected UnitManager			unitManager;
 	private WorkerManager			workerManager;
-	protected ResourceManager			resourceManager;
-	
-	public boolean build( UnitType.UnitTypes buildType)
+	protected ResourceManager		resourceManager;
+
+	public boolean build(UnitType.UnitTypes buildType)
 	{
 		System.out.println("Build doesn't work in the super class!");
 		return false;
@@ -83,13 +83,13 @@ public class BuildingManager extends Manager
 	public BuildingManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager,
 			ResourceManager resourceManager)
 	{
-		this.bwapi = bwapi;
-		this.unitManager = unitManager;
-		this.workerManager = workerManager;
-		this.resourceManager = resourceManager;
-		
-		baseTypeID		= Utility.getCommonTypeID(CommonUnitType.Base);
-		extractorTypeID	= Utility.getCommonTypeID(CommonUnitType.Extractor);		
+		this.bwapi				= bwapi;
+		this.unitManager		= unitManager;
+		this.workerManager		= workerManager;
+		this.resourceManager	= resourceManager;
+
+		baseTypeID = Utility.getCommonTypeID(CommonUnitType.Base);
+		extractorTypeID = Utility.getCommonTypeID(CommonUnitType.Extractor);
 	}
 
 	/** Draw all of the buildings squares held in each of the arrays */
@@ -132,7 +132,7 @@ public class BuildingManager extends Manager
 		// The start coordinates, which are generally opposite the geyser.
 		int startX = 1;
 		int startY = 0;
-		
+
 		System.out.println("The base center is x: " + baseCentreX + ", y: " + baseCentreY);
 
 		// The build direction, which is the opposite of the minerals
@@ -240,7 +240,7 @@ public class BuildingManager extends Manager
 		nextDefenceLocation = buildLocations.size() - 1;
 	}
 
-	//TODO: Zerg Specific
+	// TODO: Zerg Specific
 	/** Calculates all of the build locations for a given creep colony */
 	protected void calculateBuildLocationsColony(BaseInfo colonyInfo, Unit hatchery)
 	{
@@ -335,7 +335,9 @@ public class BuildingManager extends Manager
 
 	private void calculateExpansionLocations(Unit hatchery)
 	{
-		List<BaseLocation> iBaseList = bwapi.getMap().getBaseLocations(); // immutable base list
+		List<BaseLocation> iBaseList = bwapi.getMap().getBaseLocations(); // immutable
+																			// base
+																			// list
 		ArrayList<BaseLocation> mBaseList = new ArrayList<BaseLocation>(iBaseList);
 		BaseLocation homeBase = getNextClosestExpansionLocation(mBaseList, hatchery);
 		mBaseList.remove(homeBase); // Remove the home base, don't care about it
@@ -466,6 +468,10 @@ public class BuildingManager extends Manager
 	 * until a buildable place can be found. This should not be relied upon, and
 	 * higher level methods should instead predetermine where to build.
 	 */
+
+	private int		tx, ty, bt, wi;
+	private boolean	building	= false;
+
 	public boolean buildBuilding(int buildingType, int tileX, int tileY, Unit worker)
 	{
 		// if not a valid build position, move it!
@@ -484,29 +490,41 @@ public class BuildingManager extends Manager
 		{
 			return false;
 		}
-		
-				
+
 		System.out.println("Using worker number " + worker.getID() + " to build unit " + buildingType);
 		workerManager.addBusyWorker(worker.getID());
+
+		tx = tileX;
+		ty = tileY;
+		bt = buildingType;
+		wi = worker.getID();
+		building = true;
+
 		while (worker.getOrderID() != 30)
 		{
-			bwapi.build(worker.getID(), tileX, tileY, buildingType);
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
+			// bwapi.build(worker.getID(), tileX, tileY, buildingType);
+			System.out.println("Frame Count: " + count);
+			try
+			{
+				Thread.sleep(50);
+			}
+			catch (InterruptedException e)
+			{
 				e.printStackTrace();
 			}
 		}
-		
-		//TODO: Work out what this crap was meant to do :)
-		
+
+		building = false;
+		System.out.println("Build went through!");
+
+		// TODO: Work out what this crap was meant to do :)
+
 		// workerManager.addBusyWorker(worker.getID());
 		// try {
 		// Thread.sleep(500);
 		// } catch (InterruptedException e) {
 		// e.printStackTrace();
 		// }
-		
 
 		// try {
 		// Thread.sleep(500);
@@ -600,15 +618,29 @@ public class BuildingManager extends Manager
 		}
 
 		workerManager.addBusyWorker(worker.getID());
+
+		tx = geyser.getTileX();
+		ty = geyser.getTileY();
+		bt = extractorTypeID;
+		wi = worker.getID();
+		building = true;
+
 		while (worker.getOrderID() != 30)
 		{
-			bwapi.build(worker.getID(), geyser.getTileX(), geyser.getTileY(), extractorTypeID);
-			try {
+			// bwapi.build(worker.getID(), geyser.getTileX(), geyser.getTileY(),
+			// extractorTypeID);
+			try
+			{
 				Thread.sleep(100);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e)
+			{
 				e.printStackTrace();
 			}
 		}
+
+		building = false;
+
 		// long deadline = bwapi.getFrameCount() + 175;
 		// Check to make sure that it actually gets constructed in the future
 		// Check to make sure that it actually gets constructed in the future
@@ -638,7 +670,7 @@ public class BuildingManager extends Manager
 		// Timeout
 		return true;
 	}
-	
+
 	/**
 	 * Send worker to expansion location - Also reserves the minerals so you can
 	 * actually build it.
@@ -651,7 +683,7 @@ public class BuildingManager extends Manager
 		{
 			System.out.println("No free worker!");
 		}
-		
+
 		workerManager.addBusyWorker(worker.getID());
 		expansionWorker = worker.getID();
 		bwapi.move(worker.getID(), location.getX(), location.getY());
@@ -671,8 +703,7 @@ public class BuildingManager extends Manager
 			System.out.println("Go build!");
 			System.out.println("Base location " + expansionLocation.getTx() + expansionLocation.getTy());
 			Unit worker = bwapi.getUnit(expansionWorker);
-			if (buildBuilding(baseTypeID, expansionLocation.getTx(), expansionLocation.getTy(),
-					worker))
+			if (buildBuilding(baseTypeID, expansionLocation.getTx(), expansionLocation.getTy(), worker))
 			{
 				System.out.println("New hatchery added to expansions");
 				Unit hatchery = worker;
@@ -751,7 +782,7 @@ public class BuildingManager extends Manager
 		nextExpansionLocation = (nextExpansionLocation + 1) % expansionLocations.size();
 		return location;
 	}
-	
+
 	public int getExtractorCount()
 	{
 		return unitManager.getUnitCount(extractorTypeID, false);
@@ -880,7 +911,7 @@ public class BuildingManager extends Manager
 	{
 		Unit hall = null;
 		hall = unitManager.getMyUnitOfType(baseTypeID, false);
-		
+
 		// Zerg can upgrade thier bases
 		if (hall == null && bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal())
 		{
@@ -989,14 +1020,14 @@ public class BuildingManager extends Manager
 		int count = 0;
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			if (unit.getTypeID() == baseTypeID)		
+			if (unit.getTypeID() == baseTypeID)
 			{
 				count++;
 			}
 			// Darn zerg and their upgrading town halls
-			else if (bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal()	&&
-						(unit.getTypeID() == UnitTypes.Zerg_Lair.ordinal()		||
-						unit.getTypeID() == UnitTypes.Zerg_Hive.ordinal()		))
+			else if (bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal()
+					&& (unit.getTypeID() == UnitTypes.Zerg_Lair.ordinal() || unit.getTypeID() == UnitTypes.Zerg_Hive
+							.ordinal()))
 			{
 				count++;
 			}
@@ -1008,6 +1039,8 @@ public class BuildingManager extends Manager
 	{
 		return expansionIDs.size();
 	}
+
+	private int	count	= 0;
 
 	@Override
 	public void gameUpdate()
@@ -1024,6 +1057,12 @@ public class BuildingManager extends Manager
 			bwapi.drawText(new Point(320, 16), "Next defence location : " + nextDefenceLocation, true);
 		}
 		checkCompletedHatcheries();
+
+		if (building)
+		{
+			bwapi.build(wi, tx, ty, bt);
+			count++;
+		}
 	}
 
 	private void checkCompletedHatcheries()
