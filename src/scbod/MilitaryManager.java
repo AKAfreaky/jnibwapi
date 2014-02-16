@@ -37,30 +37,33 @@ public class MilitaryManager extends Manager
 	 */
 	private boolean						workersNeedReset;
 
-	private Point						destination;
+	protected Point						destination;
 
-	private JNIBWAPI					bwapi;
-	private IntelligenceManager			intelligenceManager;
-	private UnitManager					unitManager;
-	private WorkerManager				workerManager;
-	private State						state;
+	protected JNIBWAPI					bwapi;
+	protected IntelligenceManager		intelligenceManager;
+	protected UnitManager				unitManager;
+	protected WorkerManager				workerManager;
+	protected State						state;
 
-	// How many times has the attack cycle been run
-	// Increasing the attack cycle count makes the army move towards the enemy
-	// base
+	/** How many times has the attack cycle been run
+		Increasing the attack cycle count makes the army move towards the enemy
+		base */
 	private int							attackStartFrame;
 
 	private double						attackFramesDifference	= 1250;
 
-	// How many times has the retreat cycle been run
-	// When this count reaches a set target, defend is initiated instead
+	/** How many times has the retreat cycle been run
+		When this count reaches a set target, defend is initiated instead */
 	private int							startRetreatFrame;
 
-	// Number of frames that has to be passed until the AI will go into retreat
-	// mode
+	/** Number of frames that has to be passed until the AI will go into retreat mode */
 	private final int					retreatLength			= 300;
 
+	/** Maps unit IDs onto their priority (how important the unit is to kill) */
 	private HashMap<Integer, Integer>	priorities;
+	
+	/** All of the workers */
+	private HashSet<Integer>	workers			= new HashSet<Integer>();
 
 	/** Set all of the priorities for the units */
 	public void setPriorities()
@@ -170,23 +173,6 @@ public class MilitaryManager extends Manager
 		priorities.put(UnitTypes.Unknown.ordinal(), 0);
 	}
 
-	/** used for identifying all of the zerglings */
-	private HashSet<Integer>	zerglings		= new HashSet<Integer>();
-
-	/** used for identifying all of the hydralisks */
-	private HashSet<Integer>	hydralisks		= new HashSet<Integer>();
-
-	/** used for identifying all of the mutalisks */
-	private HashSet<Integer>	mutalisks		= new HashSet<Integer>();
-
-	/** used for identifying all of the lurkers */
-	private HashSet<Integer>	lurkers			= new HashSet<Integer>();
-
-	/** All of the workers */
-	private HashSet<Integer>	workers			= new HashSet<Integer>();
-
-	private int					overlord;
-
 	/* Only update units every few frames */
 	/*
 	 * This is required as units that are being constantly told to attack don't
@@ -207,10 +193,6 @@ public class MilitaryManager extends Manager
 		setPriorities();
 	}
 
-	public int getHydraliskCount()
-	{
-		return hydralisks.size();
-	}
 
 	/**
 	 * Returns the size of the force currently possesed by the player. This is
@@ -224,7 +206,7 @@ public class MilitaryManager extends Manager
 		int forceSize = 0;
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
+			if (unit.getTypeID() == workerManager.getWorkerTypeID())
 			{
 				continue;
 			}
@@ -297,8 +279,8 @@ public class MilitaryManager extends Manager
 	{
 		if (list.size() > 0)
 		{
-			Point averagePoint = getAverageLocation(zerglings);
-			bwapi.drawText(averagePoint.x + 2, averagePoint.y, zerglings.size() + " " + name, false);
+			Point averagePoint = getAverageLocation(list);
+			bwapi.drawText(averagePoint.x + 2, averagePoint.y, list.size() + " " + name, false);
 			bwapi.drawText(averagePoint.x, averagePoint.y + 10, state.toString(), false);
 		}
 	}
@@ -509,7 +491,7 @@ public class MilitaryManager extends Manager
 		}
 	}
 
-	private void attackUnits()
+	protected void attackUnits()
 	{
 		if (getForceSize() < 4)
 		{
@@ -524,55 +506,9 @@ public class MilitaryManager extends Manager
 				break;
 			}
 		}
-		for (int unitID : zerglings)
-		{
-			sendToAttackBasic(unitID);
-		}
-		for (int unitID : hydralisks)
-		{
-			sendToAttackBasic(unitID);
-		}
-		for (int unitID : mutalisks)
-		{
-			sendToAttackBasic(unitID);
-		}
-		for (int unitID : lurkers)
-		{
-			Unit unit = bwapi.getUnit(unitID);
-			Unit target = getHighestPriorityUnit((new Point(unit.getX(), unit.getY())));
-			if (!unit.isBurrowed())
-			{
-				if (Utility.getDistance(unit.getX(), unit.getY(), target.getX(), target.getY()) < 200)
-				{
-					bwapi.burrow(unitID);
-				}
-				else
-				{
-					bwapi.move(unitID, target.getX(), target.getY());
-				}
-			}
-			else
-			{
-				if (Utility.getDistance(unit.getX(), unit.getY(), target.getX(), target.getY()) > 300)
-				{
-					bwapi.unburrow(unitID);
-				}
-				else
-				{
-					bwapi.attack(unitID, target.getID());
-				}
-			}
-
-		}
-		if (overlord != Utility.NOT_SET)
-		{
-			Unit unit = bwapi.getUnit(overlord);
-			Unit target = getHighestPriorityUnit((new Point(unit.getX(), unit.getY())));
-			bwapi.rightClick(overlord, target.getID());
-		}
 	}
 
-	private void sendToAttackBasic(int unitID)
+	protected void sendToAttackBasic(int unitID)
 	{
 		Unit unit = bwapi.getUnit(unitID);
 		Unit target = getHighestPriorityUnit((new Point(unit.getX(), unit.getY())));
@@ -587,47 +523,16 @@ public class MilitaryManager extends Manager
 	}
 
 	/** Moves all units to the current destination */
-	private void moveUnits()
+	protected void moveUnits()
 	{
-		int i = 0;
-		int total = zerglings.size() + hydralisks.size();
-		for (int unitID : zerglings)
-		{
-			moveToDestination(unitID, i, total);
-			i++;
-		}
-		for (int unitID : hydralisks)
-		{
-			moveToDestination(unitID, i, total);
-			i++;
-		}
-		for (int unitID : mutalisks)
-		{
-			moveToDestination(unitID, i, total);
-			i++;
-		}
-		for (int unitID : lurkers)
-		{
-			if (bwapi.getUnit(unitID).isBurrowed())
-			{
-				bwapi.unburrow(unitID);
-				continue;
-			}
-			moveToDestination(unitID, i, total);
-			i++;
-		}
-		if (overlord != Utility.NOT_SET)
-		{
-			moveToDestination(overlord, i, total);
-			i++;
-		}
+		//TODO: Move some of the method back here
 	}
 
 	/**
 	 * Move a unit to the destination, based on how many units there are
 	 * currently in play
 	 */
-	private void moveToDestination(int unitID, int place, int unitTotal)
+	protected void moveToDestination(int unitID, int place, int unitTotal)
 	{
 		int x = destination.x;
 		int y = destination.y;
@@ -700,7 +605,6 @@ public class MilitaryManager extends Manager
 		previousUpdateTime = 0;
 		/* Set the start destination to be the chokepoint of the starting area */
 		setDestinationToChokePoint();
-		overlord = Utility.NOT_SET;
 		workersNeedReset = false;
 	}
 
@@ -709,33 +613,9 @@ public class MilitaryManager extends Manager
 		Unit unit = bwapi.getUnit(unitID);
 		if (unit.getPlayerID() == bwapi.getSelf().getID())
 		{
-			if (unit.getTypeID() == UnitTypes.Zerg_Zergling.ordinal())
-			{
-				zerglings.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Hydralisk.ordinal())
-			{
-				hydralisks.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Mutalisk.ordinal())
-			{
-				mutalisks.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
+			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
 			{
 				workers.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Lurker.ordinal())
-			{
-				if (hydralisks.contains(unitID))
-				{
-					hydralisks.remove(unitID);
-				}
-				lurkers.add(unitID);
-			}
-			else if (overlord == Utility.NOT_SET && unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal())
-			{
-				overlord = unitID;
 			}
 		}
 	}
@@ -745,63 +625,18 @@ public class MilitaryManager extends Manager
 		Unit unit = bwapi.getUnit(unitID);
 		if (unit.getPlayerID() == bwapi.getSelf().getID())
 		{
-			if (unit.getTypeID() == UnitTypes.Zerg_Zergling.ordinal())
-			{
-				zerglings.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Hydralisk.ordinal())
-			{
-				hydralisks.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Mutalisk.ordinal())
-			{
-				mutalisks.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
+			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
 			{
 				workers.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Lurker.ordinal())
-			{
-				if (hydralisks.contains(unitID))
-				{
-					hydralisks.remove(unitID);
-				}
-				lurkers.add(unitID);
-			}
-			else if (overlord == Utility.NOT_SET && unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal())
-			{
-				overlord = unitID;
 			}
 		}
 	}
 
 	public void unitDestroy(int unitID)
 	{
-		if (zerglings.contains(unitID))
-		{
-			zerglings.remove(unitID);
-		}
-		else if (hydralisks.contains(unitID))
-		{
-			hydralisks.remove(unitID);
-		}
-		else if (mutalisks.contains(unitID))
-		{
-			mutalisks.remove(unitID);
-		}
-		else if (workers.contains(unitID))
+		if (workers.contains(unitID))
 		{
 			workers.remove(unitID);
-		}
-		else if (lurkers.contains(unitID))
-		{
-			lurkers.remove(unitID);
-		}
-		else if (unitID == overlord)
-		{
-			overlord = Utility.NOT_SET;
-			overlord = unitManager.getMyUnitOfType(UnitTypes.Zerg_Overlord.ordinal()).getID();
 		}
 	}
 
