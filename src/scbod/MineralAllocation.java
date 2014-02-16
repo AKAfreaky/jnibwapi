@@ -34,7 +34,7 @@ public class MineralAllocation {
 	
 	public void removeDrone(int ID){
 		if(assignedDrones.contains(ID)){
-			assignedDrones.remove(ID);
+			assignedDrones.remove(Integer.valueOf(ID));
 		}
 		else{
 			return;

@@ -94,7 +94,6 @@ public class WorkerManager extends Manager
 		{
 			Unit extractorUnit = bwapi.getUnit(extractor.geyserID);
 			Unit worker = null;
-			double currentShortestDistance = Utility.NOT_SET;
 
 			/* Already have enough workers, don't want anymore */
 			if (extractor.gasWorkers.size() >= 3)
@@ -105,28 +104,7 @@ public class WorkerManager extends Manager
 			// Find the 3 nearest drones
 			for (int i = extractor.gasWorkers.size(); i < 3; i++)
 			{
-				//TODO: Silly code repeatition here, same code as getNearestFreeWorker but it checks if its carring minerals.
-				worker = null;
-				currentShortestDistance = Utility.NOT_SET;
-				// Find the nearest free drone
-				for (Unit unit : bwapi.getMyUnits())
-				{
-					if (unit.getTypeID() == getWorkerTypeID()
-							&& !unit.isCarryingMinerals()
-							&& !busyWorkers.contains(unit.getID())
-							&& !globalGasWorkers.contains(unit.getID()))
-					{
-						double workerDistance = Utility.getDistance(
-								extractorUnit.getX(), unit.getX(),
-								extractorUnit.getY(), unit.getY());
-						if (worker == null
-								|| workerDistance < currentShortestDistance)
-						{
-							worker = unit;
-							currentShortestDistance = workerDistance;
-						}
-					}
-				}
+				worker = getNearestFreeWorker(extractorUnit.getX(), extractorUnit.getY());
 				
 				if (worker == null)
 				{
@@ -142,7 +120,6 @@ public class WorkerManager extends Manager
 
 	public Unit getNearestFreeWorker(int tileX, int tileY)
 	{
-		System.out.println("Looking for nearest free worker...");
 		Unit worker = null;
 		double currentShortestDistance = Utility.NOT_SET;
 		// Find the nearest drone
@@ -161,8 +138,6 @@ public class WorkerManager extends Manager
 				}
 			}
 		}
-		
-		System.out.printf("%s", (worker == null) ? "Couldn't find a free worker" : "Found worker ID: " + worker.getID() + "." );
 		
 		return worker;
 	}
@@ -206,7 +181,7 @@ public class WorkerManager extends Manager
 	/** Remove the given ID from the list of busy workers */
 	public void removeBusyWorker(int unitID)
 	{
-		busyWorkers.remove(unitID);
+		busyWorkers.remove(Integer.valueOf(unitID));
 	}
 
 	@Override
@@ -313,6 +288,7 @@ public class WorkerManager extends Manager
 
 	public void recalculateMiningWorkers()
 	{
+		System.out.println("Recalculating mining workers");
 		for (MineralAllocation mineral : mineralFields)
 		{
 			mineral.clearDrones();
@@ -333,6 +309,7 @@ public class WorkerManager extends Manager
 	/** Sends a drone to go mine at the best possible mineral patch */
 	private void calculateMining(int unitID)
 	{
+		System.out.println("Calculating mining for worker " + unitID);
 		Unit worker = bwapi.getUnit(unitID);
 		MineralAllocation bestMineral = null;
 		int lowestAllocationCount = Utility.NOT_SET;
@@ -364,7 +341,7 @@ public class WorkerManager extends Manager
 			return;
 		}
 		// send drone to mine
-		bwapi.rightClick(unitID, bestMineral.getID());
+		bwapi.gather(unitID, bestMineral.getID());
 		// add drone to the minerals known drone list
 		bestMineral.assignDrone(unitID);
 	}
@@ -386,7 +363,7 @@ public class WorkerManager extends Manager
 		removeMineral(unitID);
 		if (workers.contains(unitID))
 		{
-			workers.remove(unitID);
+			workers.remove(Integer.valueOf(unitID));
 			// Check to see whether a drone is currently mining, if so,
 			// remove it form mineral allocations.
 			for (MineralAllocation mineral : mineralFields)
@@ -396,16 +373,16 @@ public class WorkerManager extends Manager
 		}
 		if (busyWorkers.contains(unitID))
 		{
-			busyWorkers.remove(unitID);
+			busyWorkers.remove(Integer.valueOf(unitID));
 		}
 		if (globalGasWorkers.contains(unitID))
 		{
-			globalGasWorkers.remove(unitID);
+			globalGasWorkers.remove(Integer.valueOf(unitID));
 			for (ExtractorInfo extractor : extractors)
 			{
 				if (extractor.gasWorkers.contains(unitID))
 				{
-					extractor.gasWorkers.remove(unitID);
+					extractor.gasWorkers.remove(Integer.valueOf(unitID));
 					break;
 				}
 			}
@@ -431,7 +408,7 @@ public class WorkerManager extends Manager
 			if (workers.contains(unitID)
 					&& unit.getTypeID() != workerTypeID)
 			{
-				workers.remove(unitID);
+				workers.remove(Integer.valueOf(unitID));
 			}
 		}
 	}
@@ -453,10 +430,16 @@ public class WorkerManager extends Manager
 		{
 			bwapi.drawText(new Point(320, 32), "Drone Count : "
 					+ getWorkerCount(), true);
+			bwapi.drawText(new Point(1, 40), "Current worker orders:", true);
+			int y = 60;
 			for (Unit unit : bwapi.getMyUnits())
 			{
 				if (unit.getTypeID() == getWorkerTypeID())
 				{
+					bwapi.drawText(new Point(0, y), "Worker " + unit.getID() + ": " + unit.getOrderID(),true);
+					y += 10;
+					
+					
 					// worker is lying and isn't busy, send them back to work!
 					if (isWorkerBusy(unit.getID()))
 					{
