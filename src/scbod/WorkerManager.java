@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;
+import scbod.Utility.CommonUnitType;
 
 /**
  * Worker manager controls all the workers and has them all mining minerals.
@@ -56,14 +57,14 @@ public class WorkerManager extends Manager
 		// Count workers in play
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			if (unit.getTypeID() == getWorkerTypeID())
+			if (unit.getTypeID() == workerTypeID)
 			{
 				count++;
 			}
 		}
 
 		// Count drones about to be morphed if we're Zerg
-		if (getWorkerTypeID() == UnitTypes.Zerg_Drone.ordinal())
+		if (workerTypeID == UnitTypes.Zerg_Drone.ordinal())
 		{
 			for (Unit unit : bwapi.getMyUnits())
 			{
@@ -192,22 +193,18 @@ public class WorkerManager extends Manager
 		baseBuildings.clear();
 		globalGasWorkers.clear();
 		workers.clear();
+		workerTypeID = Utility.getCommonTypeID(CommonUnitType.Worker);
+		baseTypeID	 = Utility.getCommonTypeID(CommonUnitType.Base);
 
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal()
-					|| unit.getTypeID() == UnitTypes.Terran_SCV.ordinal()
-					|| unit.getTypeID() == UnitTypes.Protoss_Probe.ordinal())
+			if (unit.getTypeID() == workerTypeID)
 			{
 				workers.add(unit.getID());
-				workerTypeID = unit.getTypeID();
 			}
 
-			if (unit.getTypeID() == UnitTypes.Zerg_Hatchery.ordinal()
-					|| unit.getTypeID() == UnitTypes.Terran_Command_Center.ordinal()
-					|| unit.getTypeID() == UnitTypes.Protoss_Nexus.ordinal())
+			if (unit.getTypeID() == baseTypeID)
 			{
-				baseTypeID = unit.getTypeID();
 				newBaseBuilding(new BaseInfo(unit));	
 			}
 		}
@@ -296,10 +293,13 @@ public class WorkerManager extends Manager
 		for (Unit unit : bwapi.getMyUnits())
 		{
 			// don't disturb the busy and the gas workers!
-			if (busyWorkers.contains(unit.getID())
-					|| globalGasWorkers.contains(unit.getID()))
+			if (busyWorkers.contains(unit.getID()) || 
+				globalGasWorkers.contains(unit.getID()))
+			{
 				continue;
-			if (unit.getTypeID() == getWorkerTypeID())
+			}
+			
+			if (unit.getTypeID() == workerTypeID)
 			{
 				calculateMining(unit.getID());
 			}
@@ -434,7 +434,7 @@ public class WorkerManager extends Manager
 			int y = 60;
 			for (Unit unit : bwapi.getMyUnits())
 			{
-				if (unit.getTypeID() == getWorkerTypeID())
+				if (unit.getTypeID() == workerTypeID)
 				{
 					bwapi.drawText(new Point(0, y), "Worker " + unit.getID() + ": " + unit.getOrderID(),true);
 					y += 10;
@@ -468,7 +468,7 @@ public class WorkerManager extends Manager
 	 */
 	public int getWorkerTypeID()
 	{
-		return workerTypeID;
+		return Utility.getCommonTypeID(CommonUnitType.Worker);
 	}
 
 }

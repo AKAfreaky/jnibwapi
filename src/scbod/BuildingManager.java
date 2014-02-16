@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import scbod.Utility.CommonUnitType;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.BaseLocation;
 import jnibwapi.model.Unit;
@@ -72,6 +73,12 @@ public class BuildingManager extends Manager
 	protected UnitManager				unitManager;
 	private WorkerManager			workerManager;
 	protected ResourceManager			resourceManager;
+	
+	public boolean build( UnitType.UnitTypes buildType)
+	{
+		System.out.println("Build doesn't work in the super class!");
+		return false;
+	}
 
 	public BuildingManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager,
 			ResourceManager resourceManager)
@@ -80,6 +87,9 @@ public class BuildingManager extends Manager
 		this.unitManager = unitManager;
 		this.workerManager = workerManager;
 		this.resourceManager = resourceManager;
+		
+		baseTypeID		= Utility.getCommonTypeID(CommonUnitType.Base);
+		extractorTypeID	= Utility.getCommonTypeID(CommonUnitType.Extractor);		
 	}
 
 	/** Draw all of the buildings squares held in each of the arrays */
