@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
+import jnibwapi.types.UnitType;
 import jnibwapi.types.UnitType.UnitTypes;
 
 public class ZergBuildingManager extends BuildingManager
@@ -15,9 +16,6 @@ public class ZergBuildingManager extends BuildingManager
 			ResourceManager resourceManager)
 	{
 		super(bwapi, unitManager, workerManager, resourceManager);
-
-		baseTypeID		= UnitTypes.Zerg_Hatchery.ordinal();
-		extractorTypeID	= UnitTypes.Zerg_Extractor.ordinal(); 
 	}
 
 	/** Builds a macro hatchery */
@@ -370,6 +368,30 @@ public class ZergBuildingManager extends BuildingManager
 		}
 		super.unitDestroy(unitID);
 		
+	}
+	
+	@Override
+	public boolean build( UnitType.UnitTypes buildType)
+	{
+		switch(buildType)
+		{
+			case Zerg_Creep_Colony:
+				return buildCreepColony();
+			case Zerg_Evolution_Chamber:
+				return buildEvolutionChamber();
+			case Zerg_Hydralisk_Den:
+				return buildHydraliskDen();				
+			case Zerg_Hatchery:
+				return buildMacroHatchery();				
+			case Zerg_Spawning_Pool:
+				return buildSpawningPool();
+			case Zerg_Spire:
+				return buildSpire();
+			default:
+				System.out.println("Can't build that building!");
+				break;
+		}
+		return false;
 	}
 	
 }
