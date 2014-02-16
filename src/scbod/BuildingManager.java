@@ -122,6 +122,8 @@ public class BuildingManager extends Manager
 		// The start coordinates, which are generally opposite the geyser.
 		int startX = 1;
 		int startY = 0;
+		
+		System.out.println("The base center is x: " + baseCentreX + ", y: " + baseCentreY);
 
 		// The build direction, which is the opposite of the minerals
 		int buildX = 0;
@@ -456,16 +458,13 @@ public class BuildingManager extends Manager
 	 */
 	public boolean buildBuilding(int buildingType, int tileX, int tileY, Unit worker)
 	{
-		System.out.println("Going to build?");
-		System.out.println("Finished looking at drones...");
-
 		// if not a valid build position, move it!
 		Random random = new Random();
 		int retries = 0;
 		int timeout = 20;
 		while (!validBuildPosition(buildingType, tileX, tileY) && retries < timeout)
 		{
-			System.out.println("Valid build position?");
+			System.out.println("Changing build position slightly.");
 			tileX += (random.nextInt(4) - 2);
 			tileY += (random.nextInt(4) - 2);
 			retries++;
@@ -475,10 +474,19 @@ public class BuildingManager extends Manager
 		{
 			return false;
 		}
-
-		System.out.println("Using worker number " + worker.getID() + " to build.");
-		boolean retVal = bwapi.build(worker.getID(), tileX, tileY, buildingType);
-		System.out.println("Build command was " + ((retVal) ? "successful." : "a failure."));
+		
+				
+		System.out.println("Using worker number " + worker.getID() + " to build unit " + buildingType);
+		workerManager.addBusyWorker(worker.getID());
+		while (worker.getOrderID() != 30)
+		{
+			bwapi.build(worker.getID(), tileX, tileY, buildingType);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		
 		//TODO: Work out what this crap was meant to do :)
 		
@@ -582,7 +590,15 @@ public class BuildingManager extends Manager
 		}
 
 		workerManager.addBusyWorker(worker.getID());
-		bwapi.build(worker.getID(), geyser.getTileX(), geyser.getTileY(), extractorTypeID);
+		while (worker.getOrderID() != 30)
+		{
+			bwapi.build(worker.getID(), geyser.getTileX(), geyser.getTileY(), extractorTypeID);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		// long deadline = bwapi.getFrameCount() + 175;
 		// Check to make sure that it actually gets constructed in the future
 		// Check to make sure that it actually gets constructed in the future
@@ -1033,7 +1049,7 @@ public class BuildingManager extends Manager
 				{
 					System.out.println("Expansion failed to be made, reset.");
 					expansionIndex = expansionIDs.indexOf(base.id);
-					expansionIDs.remove(base.id);
+					expansionIDs.remove(Integer.valueOf(base.id));
 					expansionIDs.trimToSize();
 					// Force expansion to be made again!
 					expansionWorker = base.id;
@@ -1110,7 +1126,7 @@ public class BuildingManager extends Manager
 		{
 			System.out.println("EXPANSION DESTROYED");
 			expansionIndex = expansionIDs.indexOf(unitID);
-			expansionIDs.remove(unitID);
+			expansionIDs.remove(Integer.valueOf(unitID));
 			expansionIDs.trimToSize();
 		}
 		if (unitID == expansionWorker)
