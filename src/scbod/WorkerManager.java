@@ -303,7 +303,6 @@ public class WorkerManager extends Manager
 	/** Sends a drone to go mine at the best possible mineral patch */
 	private void calculateMining(int unitID)
 	{
-		System.out.println("Calculating mining for worker " + unitID);
 		Unit worker = bwapi.getUnit(unitID);
 		MineralAllocation bestMineral = null;
 		int lowestAllocationCount = Utility.NOT_SET;
@@ -411,7 +410,7 @@ public class WorkerManager extends Manager
 	{
 		if (!busyWorkers.contains(worker.getID()))
 		{
-			System.out.println("Worker number " + worker.getID() + " was idle. Cracking the whip...");
+			//System.out.println("Worker number " + worker.getID() + " was idle. Cracking the whip...");
 			calculateMining(worker.getID());
 		}
 	}

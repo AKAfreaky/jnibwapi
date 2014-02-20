@@ -8,11 +8,8 @@ import jnibwapi.types.UnitType.UnitTypes;
 /** Handles the spawning and production of new units */
 public class ZergProductionManager extends ProductionManager
 {
-
-	private ResourceManager		resourceManager;
-	private ZergBuildingManager	buildingManager;
-	private JNIBWAPI			bwapi;
-
+	private ZergBuildingManager buildingManager;
+	
 	public ZergProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, BuildingManager buildingManager)
 	{
 		this.bwapi = bwapi;

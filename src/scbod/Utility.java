@@ -86,6 +86,11 @@ public class Utility
 		RACE = race;
 	}
 	
+	public static RaceTypes getRace()
+	{
+		return RACE;
+	}
+	
 
 	public enum CommonUnitType
 	{

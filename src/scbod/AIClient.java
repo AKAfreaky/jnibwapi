@@ -110,12 +110,22 @@ public class AIClient implements BWAPIEventListener, Runnable
 		workerManager		= new WorkerManager(bwapi);
 		scoutManager		= new ScoutManager(bwapi);
 		
-		if (bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal())
+		if (Utility.getRace() == RaceTypes.Zerg)
 		{
+			System.out.println("ZergZergZergZergZerg..");
 			intelligenceManager	= new ZergIntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
 			buildingManager		= new ZergBuildingManager(bwapi, unitManager, workerManager, resourceManager);
 			productionManager	= new ZergProductionManager(bwapi, resourceManager, buildingManager);
 			militaryManager		= new ZergMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
+			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager);
+		}
+		else if ( Utility.getRace() == RaceTypes.Terran)
+		{
+			System.out.println("Terran");
+			intelligenceManager	= new IntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
+			buildingManager		= new TerranBuildingManager(bwapi, unitManager, workerManager, resourceManager);
+			productionManager	= new TerranProductionManager(bwapi, resourceManager, buildingManager);
+			militaryManager		= new MilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
 			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager);
 		}
 		
@@ -231,6 +241,8 @@ public class AIClient implements BWAPIEventListener, Runnable
 
 	public void unitCreate(int unitID)
 	{
+		System.out.println("Unit " + unitID + " created.");
+		
 		// Call managers
 		for (Manager manager : managers)
 		{
