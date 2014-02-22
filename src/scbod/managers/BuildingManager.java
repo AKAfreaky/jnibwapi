@@ -80,8 +80,8 @@ public class BuildingManager extends Manager
 	protected UnitManager			unitManager;
 	private WorkerManager			workerManager;
 	protected ResourceManager		resourceManager;
-	
-	private ArrayList<Integer>		builders 			= new ArrayList<Integer>();
+
+	private ArrayList<Integer>		builders			= new ArrayList<Integer>();
 
 	public boolean build(UnitType.UnitTypes buildType)
 	{
@@ -92,10 +92,10 @@ public class BuildingManager extends Manager
 	public BuildingManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager,
 			ResourceManager resourceManager)
 	{
-		this.bwapi				= bwapi;
-		this.unitManager		= unitManager;
-		this.workerManager		= workerManager;
-		this.resourceManager	= resourceManager;
+		this.bwapi = bwapi;
+		this.unitManager = unitManager;
+		this.workerManager = workerManager;
+		this.resourceManager = resourceManager;
 
 		baseTypeID = Utility.getCommonTypeID(CommonUnitType.Base);
 		extractorTypeID = Utility.getCommonTypeID(CommonUnitType.Extractor);
@@ -248,7 +248,6 @@ public class BuildingManager extends Manager
 		// built at expansions first.
 		nextDefenceLocation = buildLocations.size() - 1;
 	}
-
 
 	protected Point getNextBuildLocation()
 	{
@@ -453,7 +452,7 @@ public class BuildingManager extends Manager
 			return false;
 		}
 
-		System.out.println("Using worker number " + worker.getID() + " to build unit " + buildingType);		
+		System.out.println("Using worker number " + worker.getID() + " to build unit " + buildingType);
 		workerManager.queueOrder(new WorkerOrderData(WorkerOrder.Build, worker.getID(), tileX, tileY, buildingType));
 		builders.add(worker.getID());
 		return true;
@@ -512,8 +511,11 @@ public class BuildingManager extends Manager
 			return false;
 		}
 
-
-		workerManager.queueOrder(new WorkerOrderData(WorkerOrder.Build, worker.getID(), geyser.getTileX(), geyser.getTileY(), extractorTypeID));
+		workerManager.queueOrder(new WorkerOrderData(	WorkerOrder.Build,
+														worker.getID(),
+														geyser.getTileX(),
+														geyser.getTileY(),
+														extractorTypeID));
 		builders.add(worker.getID());
 		return true;
 	}
@@ -533,7 +535,10 @@ public class BuildingManager extends Manager
 
 		workerManager.addBusyWorker(worker.getID());
 		expansionWorker = worker.getID();
-		workerManager.queueOrder(new WorkerOrderData(WorkerOrder.Move, expansionWorker, location.getX(), location.getY()));
+		workerManager.queueOrder(new WorkerOrderData(	WorkerOrder.Move,
+														expansionWorker, 
+														location.getX(), 
+														location.getY()));
 		resourceManager.reserveMinerals(300);
 	}
 
@@ -904,14 +909,6 @@ public class BuildingManager extends Manager
 			bwapi.drawText(new Point(320, 16), "Next defence location : " + nextDefenceLocation, true);
 		}
 		checkCompletedHatcheries();
-
-		/*
-		if (building)
-		{
-			bwapi.build(wi, tx, ty, bt);
-			count++;
-		}
-		*/
 	}
 
 	private void checkCompletedHatcheries()
@@ -1009,7 +1006,7 @@ public class BuildingManager extends Manager
 	{
 		Unit unit = bwapi.getUnit(unitID);
 		if (bwapi.getUnitType(unit.getTypeID()).isBuilding())
-		{	
+		{
 			addBuildingToKnowldegeBase(unitID, unit);
 		}
 	}
@@ -1031,7 +1028,7 @@ public class BuildingManager extends Manager
 		{
 			expansionWorker = Utility.NOT_SET;
 		}
-		
+
 		if (builders.contains(unitID))
 		{
 			workerManager.removeBusyWorker(unitID);
@@ -1091,15 +1088,14 @@ public class BuildingManager extends Manager
 		{
 			removeBuildingFromKnowldegeBase(unitID);
 		}
-		
-		
+
 		if (builders.contains(unitID))
 		{
 			workerManager.removeBusyWorker(unitID);
 			builders.remove(Integer.valueOf(unitID));
 		}
 	}
-	
+
 	public void idleWorker(int unitID)
 	{
 		if (builders.contains(unitID))
