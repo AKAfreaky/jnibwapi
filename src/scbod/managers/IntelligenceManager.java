@@ -1,9 +1,13 @@
-package scbod;
+package scbod.managers;
 
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import scbod.AIClient;
+import scbod.BuildingInfo;
+import scbod.ScoutFinished;
+import scbod.Utility;
 import scbod.Utility.CommonUnitType;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.BaseLocation;

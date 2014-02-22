@@ -1,8 +1,13 @@
-package scbod;
+package scbod.managers.Zerg;
 
 import java.awt.Point;
 import java.util.HashSet;
 
+import scbod.Utility;
+import scbod.managers.IntelligenceManager;
+import scbod.managers.MilitaryManager;
+import scbod.managers.UnitManager;
+import scbod.managers.WorkerManager;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;

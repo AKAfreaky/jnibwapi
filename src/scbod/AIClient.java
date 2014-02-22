@@ -3,6 +3,9 @@ package scbod;
 import java.util.ArrayList;
 
 import scbod.Utility.CommonUnitType;
+import scbod.managers.*;
+import scbod.managers.Terran.*;
+import scbod.managers.Zerg.*;
 import jnibwapi.BWAPIEventListener;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
@@ -108,7 +111,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 		resourceManager		= new ResourceManager(bwapi);
 		unitManager			= new UnitManager(bwapi);
 		workerManager		= new WorkerManager(bwapi);
-		scoutManager		= new ScoutManager(bwapi);
+		scoutManager		= new ScoutManager(bwapi, workerManager);
 		
 		if (Utility.getRace() == RaceTypes.Zerg)
 		{
@@ -185,6 +188,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 				{
 					if (unit.getTypeID() == Utility.getCommonTypeID(CommonUnitType.Worker))
 					{
+						buildingManager.idleWorker(unit.getID());
 						workerManager.idleWorker(unit);
 					}
 				}
@@ -240,9 +244,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 	}
 
 	public void unitCreate(int unitID)
-	{
-		System.out.println("Unit " + unitID + " created.");
-		
+	{		
 		// Call managers
 		for (Manager manager : managers)
 		{

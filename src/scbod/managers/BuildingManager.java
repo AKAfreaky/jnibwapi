@@ -1,4 +1,4 @@
-package scbod;
+package scbod.managers;
 
 import java.awt.Point;
 import java.io.FileWriter;
@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import scbod.AIClient;
+import scbod.BaseInfo;
+import scbod.BuildingInfo;
+import scbod.Direction;
+import scbod.Utility;
 import scbod.Utility.CommonUnitType;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.BaseLocation;
@@ -16,6 +21,8 @@ import jnibwapi.types.UnitType;
 import jnibwapi.types.RaceType.RaceTypes;
 import jnibwapi.types.UnitType.UnitTypes;
 import jnibwapi.util.BWColor;
+import scbod.WorkerOrderData;
+import scbod.WorkerOrderData.WorkerOrder;
 
 /**
  * Building Manager * * *
@@ -73,6 +80,8 @@ public class BuildingManager extends Manager
 	protected UnitManager			unitManager;
 	private WorkerManager			workerManager;
 	protected ResourceManager		resourceManager;
+	
+	private ArrayList<Integer>		builders 			= new ArrayList<Integer>();
 
 	public boolean build(UnitType.UnitTypes buildType)
 	{
@@ -240,49 +249,6 @@ public class BuildingManager extends Manager
 		nextDefenceLocation = buildLocations.size() - 1;
 	}
 
-	// TODO: Zerg Specific
-	/** Calculates all of the build locations for a given creep colony */
-	protected void calculateBuildLocationsColony(BaseInfo colonyInfo, Unit hatchery)
-	{
-
-		Direction hatcheryDirection = getHatcheryDirection(colonyInfo.structure, hatchery);
-
-		int colonyX = colonyInfo.structure.getTileX();
-		int colonyY = colonyInfo.structure.getTileY();
-
-		if (hatcheryDirection == null)
-		{
-			return;
-		}
-		switch (hatcheryDirection)
-		{
-			case East:
-				buildLocations.add(new Point(colonyX - 3, colonyY + 1));
-				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
-				buildLocations.add(new Point(colonyX - 3, colonyY - 1));
-				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
-				break;
-			case South:
-				buildLocations.add(new Point(colonyX + 1, colonyY - 3));
-				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
-				buildLocations.add(new Point(colonyX - 1, colonyY - 3));
-				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
-				break;
-			case West:
-				buildLocations.add(new Point(colonyX + 3, colonyY + 1));
-				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
-				buildLocations.add(new Point(colonyX + 3, colonyY - 1));
-				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
-				break;
-			case North:
-				buildLocations.add(new Point(colonyX + 1, colonyY + 3));
-				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
-				buildLocations.add(new Point(colonyX - 1, colonyY + 3));
-				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
-				break;
-		}
-		System.out.println("Colony locations added!");
-	}
 
 	protected Point getNextBuildLocation()
 	{
@@ -468,10 +434,6 @@ public class BuildingManager extends Manager
 	 * until a buildable place can be found. This should not be relied upon, and
 	 * higher level methods should instead predetermine where to build.
 	 */
-
-	private int		tx, ty, bt, wi;
-	private boolean	building	= false;
-
 	public boolean buildBuilding(int buildingType, int tileX, int tileY, Unit worker)
 	{
 		// if not a valid build position, move it!
@@ -491,76 +453,9 @@ public class BuildingManager extends Manager
 			return false;
 		}
 
-		System.out.println("Using worker number " + worker.getID() + " to build unit " + buildingType);
-		workerManager.addBusyWorker(worker.getID());
-
-		tx = tileX;
-		ty = tileY;
-		bt = buildingType;
-		wi = worker.getID();
-		building = true;
-
-		while (worker.getOrderID() != 30)
-		{
-			// bwapi.build(worker.getID(), tileX, tileY, buildingType);
-			System.out.println("Frame Count: " + count);
-			try
-			{
-				Thread.sleep(50);
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
-		}
-
-		building = false;
-		System.out.println("Build went through!");
-
-		// TODO: Work out what this crap was meant to do :)
-
-		// workerManager.addBusyWorker(worker.getID());
-		// try {
-		// Thread.sleep(500);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-
-		// try {
-		// Thread.sleep(500);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-
-		// long deadline = bwapi.getFrameCount() + 175;
-		// // Check to make sure that it actually gets constructed in the future
-		// while(bwapi.getFrameCount() < deadline){
-		// try {
-		// Thread.sleep(100);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-		// System.out.println("FrameCount : " + bwapi.getFrameCount() +
-		// " Deadline : " + deadline);
-		// // Worker has magically become a building, means building success
-		// if(worker.getTypeID() != UnitTypes.Zerg_Drone.ordinal() &&
-		// worker.isBeingConstructed()){
-		// System.out.println("Building complete! :" + worker.getID());
-		// workerManager.removeBusyWorker(worker.getID());
-		// return true;
-		// }
-		// // Worker has gone back to slacking
-		// else if(worker.isIdle()){
-		// System.out.println("Worker returned to idle, giving up. :" +
-		// worker.getID());
-		// workerManager.removeBusyWorker(worker.getID());
-		// return false;
-		// }
-		// }
-		// Timeout
-		// workerManager.removeBusyWorker(worker.getID());
-		// System.out.println("Time out on building, worker :" +
-		// worker.getID());
+		System.out.println("Using worker number " + worker.getID() + " to build unit " + buildingType);		
+		workerManager.queueOrder(new WorkerOrderData(WorkerOrder.Build, worker.getID(), tileX, tileY, buildingType));
+		builders.add(worker.getID());
 		return true;
 	}
 
@@ -617,57 +512,9 @@ public class BuildingManager extends Manager
 			return false;
 		}
 
-		workerManager.addBusyWorker(worker.getID());
 
-		tx = geyser.getTileX();
-		ty = geyser.getTileY();
-		bt = extractorTypeID;
-		wi = worker.getID();
-		building = true;
-
-		while (worker.getOrderID() != 30)
-		{
-			// bwapi.build(worker.getID(), geyser.getTileX(), geyser.getTileY(),
-			// extractorTypeID);
-			try
-			{
-				Thread.sleep(100);
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
-		}
-
-		building = false;
-
-		// long deadline = bwapi.getFrameCount() + 175;
-		// Check to make sure that it actually gets constructed in the future
-		// Check to make sure that it actually gets constructed in the future
-		// while(bwapi.getFrameCount() < deadline){
-		// try {
-		// Thread.sleep(100);
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-		// System.out.println("FrameCount : " + bwapi.getFrameCount() +
-		// " Deadline : " + deadline);
-		// // Worker has magically become a building, means building success
-		// if(worker.getTypeID() != UnitTypes.Zerg_Drone.ordinal() &&
-		// worker.isBeingConstructed()){
-		// System.out.println("Building complete! :" + worker.getID());
-		// workerManager.removeBusyWorker(worker.getID());
-		// return true;
-		// }
-		// // Worker has gone back to slacking
-		// else if(worker.isIdle()){
-		// System.out.println("Worker returned to idle, giving up. :" +
-		// worker.getID());
-		// workerManager.removeBusyWorker(worker.getID());
-		// return false;
-		// }
-		// }
-		// Timeout
+		workerManager.queueOrder(new WorkerOrderData(WorkerOrder.Build, worker.getID(), geyser.getTileX(), geyser.getTileY(), extractorTypeID));
+		builders.add(worker.getID());
 		return true;
 	}
 
@@ -686,7 +533,7 @@ public class BuildingManager extends Manager
 
 		workerManager.addBusyWorker(worker.getID());
 		expansionWorker = worker.getID();
-		bwapi.move(worker.getID(), location.getX(), location.getY());
+		workerManager.queueOrder(new WorkerOrderData(WorkerOrder.Move, expansionWorker, location.getX(), location.getY()));
 		resourceManager.reserveMinerals(300);
 	}
 
@@ -1058,11 +905,13 @@ public class BuildingManager extends Manager
 		}
 		checkCompletedHatcheries();
 
+		/*
 		if (building)
 		{
 			bwapi.build(wi, tx, ty, bt);
 			count++;
 		}
+		*/
 	}
 
 	private void checkCompletedHatcheries()
@@ -1160,7 +1009,7 @@ public class BuildingManager extends Manager
 	{
 		Unit unit = bwapi.getUnit(unitID);
 		if (bwapi.getUnitType(unit.getTypeID()).isBuilding())
-		{
+		{	
 			addBuildingToKnowldegeBase(unitID, unit);
 		}
 	}
@@ -1181,6 +1030,12 @@ public class BuildingManager extends Manager
 		if (unitID == expansionWorker)
 		{
 			expansionWorker = Utility.NOT_SET;
+		}
+		
+		if (builders.contains(unitID))
+		{
+			workerManager.removeBusyWorker(unitID);
+			builders.remove(Integer.valueOf(unitID));
 		}
 	}
 
@@ -1235,6 +1090,23 @@ public class BuildingManager extends Manager
 		else if (bwapi.getUnitType(unit.getTypeID()).isWorker())
 		{
 			removeBuildingFromKnowldegeBase(unitID);
+		}
+		
+		
+		if (builders.contains(unitID))
+		{
+			workerManager.removeBusyWorker(unitID);
+			builders.remove(Integer.valueOf(unitID));
+		}
+	}
+	
+	public void idleWorker(int unitID)
+	{
+		if (builders.contains(unitID))
+		{
+			// Idle unit implies it's done what we asked or can't continue
+			workerManager.removeBusyWorker(unitID);
+			builders.remove(Integer.valueOf(unitID));
 		}
 	}
 }

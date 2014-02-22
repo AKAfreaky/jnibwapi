@@ -1,8 +1,14 @@
-package scbod;
+package scbod.managers.Zerg;
 
 import java.awt.Point;
 import java.util.ArrayList;
 
+import scbod.BaseInfo;
+import scbod.Direction;
+import scbod.managers.BuildingManager;
+import scbod.managers.ResourceManager;
+import scbod.managers.UnitManager;
+import scbod.managers.WorkerManager;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType;
@@ -11,7 +17,7 @@ import jnibwapi.types.UnitType.UnitTypes;
 public class ZergBuildingManager extends BuildingManager
 {
 	private ArrayList<BaseInfo>	creepColonies	= new ArrayList<BaseInfo>();
-	
+
 	public ZergBuildingManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager,
 			ResourceManager resourceManager)
 	{
@@ -33,7 +39,7 @@ public class ZergBuildingManager extends BuildingManager
 			return false;
 		}
 		Point buildLocation = getNextBuildLocation();
-	
+
 		if (buildBuilding(UnitTypes.Zerg_Hatchery.ordinal(), buildLocation.x, buildLocation.y))
 			return true;
 		else
@@ -51,9 +57,9 @@ public class ZergBuildingManager extends BuildingManager
 		{
 			return false;
 		}
-	
+
 		Point buildLocation = getNextBuildLocation();
-	
+
 		if (buildBuilding(UnitTypes.Zerg_Spire.ordinal(), buildLocation.x, buildLocation.y))
 			return true;
 		else
@@ -63,7 +69,7 @@ public class ZergBuildingManager extends BuildingManager
 	/** Builds a spawning pool! */
 	public boolean buildSpawningPool()
 	{
-	
+
 		Unit hatchery = getTownHall();
 		if (resourceManager.getMineralCount() < 200)
 		{
@@ -76,9 +82,9 @@ public class ZergBuildingManager extends BuildingManager
 			System.out.println("Need a hatchery to build spawning pool");
 			return false;
 		}
-	
+
 		Point buildLocation = getNextBuildLocation();
-	
+
 		if (buildBuilding(UnitTypes.Zerg_Spawning_Pool.ordinal(), buildLocation.x, buildLocation.y))
 			return true;
 		else
@@ -98,9 +104,9 @@ public class ZergBuildingManager extends BuildingManager
 		{
 			return false;
 		}
-	
+
 		Point buildLocation = getNextBuildLocation();
-	
+
 		if (buildBuilding(UnitTypes.Zerg_Hydralisk_Den.ordinal(), buildLocation.x, buildLocation.y))
 			return true;
 		else
@@ -119,9 +125,9 @@ public class ZergBuildingManager extends BuildingManager
 		{
 			return false;
 		}
-	
+
 		Point buildLocation = getNextBuildLocation();
-	
+
 		if (buildBuilding(UnitTypes.Zerg_Evolution_Chamber.ordinal(), buildLocation.x, buildLocation.y))
 			return true;
 		else
@@ -141,9 +147,9 @@ public class ZergBuildingManager extends BuildingManager
 		{
 			return false;
 		}
-	
+
 		Point buildLocation = getNextDefenceLocation();
-	
+
 		if (buildBuilding(UnitTypes.Zerg_Creep_Colony.ordinal(), buildLocation.x, buildLocation.y))
 			return true;
 		else
@@ -270,7 +276,7 @@ public class ZergBuildingManager extends BuildingManager
 		{
 			return true;
 		}
-	
+
 	}
 
 	/**
@@ -313,7 +319,7 @@ public class ZergBuildingManager extends BuildingManager
 		{
 			if (bwapi.getUnitType(unit.getTypeID()).isBuilding())
 			{
-	
+
 				// Check for colonies
 				// if the colony is completed
 				// and has not already been added, then add it to the base infos
@@ -343,14 +349,14 @@ public class ZergBuildingManager extends BuildingManager
 		}
 		return false;
 	}
-			
+
 	@Override
 	public void gameUpdate()
 	{
 		super.gameUpdate();
 		checkForCompletedColonies();
 	}
-		
+
 	@Override
 	public void unitDestroy(int unitID)
 	{
@@ -367,22 +373,22 @@ public class ZergBuildingManager extends BuildingManager
 			}
 		}
 		super.unitDestroy(unitID);
-		
+
 	}
-	
+
 	@Override
-	public boolean build( UnitType.UnitTypes buildType)
+	public boolean build(UnitType.UnitTypes buildType)
 	{
-		switch(buildType)
+		switch (buildType)
 		{
 			case Zerg_Creep_Colony:
 				return buildCreepColony();
 			case Zerg_Evolution_Chamber:
 				return buildEvolutionChamber();
 			case Zerg_Hydralisk_Den:
-				return buildHydraliskDen();				
+				return buildHydraliskDen();
 			case Zerg_Hatchery:
-				return buildMacroHatchery();				
+				return buildMacroHatchery();
 			case Zerg_Spawning_Pool:
 				return buildSpawningPool();
 			case Zerg_Spire:
@@ -393,5 +399,48 @@ public class ZergBuildingManager extends BuildingManager
 		}
 		return false;
 	}
-	
+
+	/** Calculates all of the build locations for a given creep colony */
+	protected void calculateBuildLocationsColony(BaseInfo colonyInfo, Unit hatchery)
+	{
+
+		Direction hatcheryDirection = getHatcheryDirection(colonyInfo.structure, hatchery);
+
+		int colonyX = colonyInfo.structure.getTileX();
+		int colonyY = colonyInfo.structure.getTileY();
+
+		if (hatcheryDirection == null)
+		{
+			return;
+		}
+		switch (hatcheryDirection)
+		{
+			case East:
+				buildLocations.add(new Point(colonyX - 3, colonyY + 1));
+				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
+				buildLocations.add(new Point(colonyX - 3, colonyY - 1));
+				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
+				break;
+			case South:
+				buildLocations.add(new Point(colonyX + 1, colonyY - 3));
+				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
+				buildLocations.add(new Point(colonyX - 1, colonyY - 3));
+				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
+				break;
+			case West:
+				buildLocations.add(new Point(colonyX + 3, colonyY + 1));
+				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
+				buildLocations.add(new Point(colonyX + 3, colonyY - 1));
+				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
+				break;
+			case North:
+				buildLocations.add(new Point(colonyX + 1, colonyY + 3));
+				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
+				buildLocations.add(new Point(colonyX - 1, colonyY + 3));
+				colonyInfo.buildingIndexes.add(buildLocations.size() - 1);
+				break;
+		}
+		System.out.println("Colony locations added!");
+	}
+
 }

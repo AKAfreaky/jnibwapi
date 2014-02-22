@@ -1,7 +1,11 @@
-package scbod;
+package scbod.managers.Terran;
 
 import java.awt.Point;
 
+import scbod.managers.BuildingManager;
+import scbod.managers.ResourceManager;
+import scbod.managers.UnitManager;
+import scbod.managers.WorkerManager;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.types.UnitType.UnitTypes;
 

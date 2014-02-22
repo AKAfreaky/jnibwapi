@@ -9,15 +9,15 @@ import jnibwapi.model.Unit;
  * location information, but only once they have been completed, such as
  * base hatcheries of creep colonies. */
 public class BaseInfo {
-	Unit structure;
-	boolean completed;
-	boolean updated;
+	public Unit structure;
+	public boolean completed;
+	public boolean updated;
 	
 	public Point location;
 	public int id;
 	public int hatcheryWaitTimer;
 	
-	ArrayList<Integer> buildingIndexes;
+	public ArrayList<Integer> buildingIndexes;
 	
 	public BaseInfo(Unit building){
 		this.structure = building;

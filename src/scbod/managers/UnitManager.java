@@ -1,4 +1,4 @@
-package scbod;
+package scbod.managers;
 
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;

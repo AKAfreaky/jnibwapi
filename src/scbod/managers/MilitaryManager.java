@@ -1,4 +1,4 @@
-package scbod;
+package scbod.managers;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import scbod.AIClient;
+import scbod.Utility;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.ChokePoint;
 import jnibwapi.model.Region;

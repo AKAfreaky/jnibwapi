@@ -1,5 +1,8 @@
-package scbod;
+package scbod.managers.Zerg;
 
+import scbod.managers.BuildingManager;
+import scbod.managers.ProductionManager;
+import scbod.managers.ResourceManager;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.TechType.TechTypes;

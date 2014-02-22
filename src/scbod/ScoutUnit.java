@@ -2,8 +2,10 @@ package scbod;
 
 import java.util.ArrayDeque;
 import java.awt.Point;
-import jnibwapi.JNIBWAPI;
 
+import jnibwapi.JNIBWAPI;
+import scbod.WorkerOrderData.WorkerOrder;
+import scbod.managers.WorkerManager;
 
 public class ScoutUnit
 {
@@ -11,13 +13,24 @@ public class ScoutUnit
 	private ArrayDeque<Point> locations;
 	private JNIBWAPI bwapi;
 	private ScoutFinished completionHandler;
+	private WorkerManager workerManager;
 	
 	public ScoutUnit( int scoutUnitID, ArrayDeque<Point> path, JNIBWAPI bwapi, ScoutFinished completionHandler)
 	{
 		unitID		= scoutUnitID;
 		locations	= path;
 		this.bwapi	= bwapi;
-		this.completionHandler = completionHandler;
+		this.completionHandler	= completionHandler;
+		this.workerManager		= null;
+	}
+	
+	public ScoutUnit( int scoutUnitID, ArrayDeque<Point> path, JNIBWAPI bwapi, ScoutFinished completionHandler, WorkerManager workerManager)
+	{
+		unitID		= scoutUnitID;
+		locations	= path;
+		this.bwapi	= bwapi;
+		this.completionHandler	= completionHandler;
+		this.workerManager		= workerManager;
 	}
 	
 	public int getUnitID()
@@ -32,17 +45,24 @@ public class ScoutUnit
 		
 		if (nextLocation == null)
 		{
-			System.out.println("Scout " + unitID + "has finished its route.");
+			System.out.println("Scout " + unitID + " has finished its route.");
 			completionHandler.scoutRouteCompleted(unitID);
-			return true;
+			return false;
 		}
 		
-		
-		if (!bwapi.move(unitID, nextLocation.x, nextLocation.y))
+		if(workerManager == null)
 		{
-			System.out.println("Can't move Scout " + unitID + " to its next location!");
-			locations.addFirst(nextLocation);
-			return false;
+			if (!bwapi.move(unitID, nextLocation.x, nextLocation.y))
+			{
+				System.out.println("Can't move Scout " + unitID + " to its next location!");
+				completionHandler.scoutRouteCompleted(unitID);
+				return false;
+			}
+		}
+		else
+		{
+			// Workers can be a bit funny with their move orders...
+			workerManager.queueOrder(new WorkerOrderData(WorkerOrder.Move, unitID, nextLocation.x, nextLocation.y));
 		}
 		
 		return true;		

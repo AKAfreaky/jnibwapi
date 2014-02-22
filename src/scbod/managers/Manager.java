@@ -1,4 +1,4 @@
-package scbod;
+package scbod.managers;
 
 /** Abstract manager class for BWAPI */
 public abstract class Manager {

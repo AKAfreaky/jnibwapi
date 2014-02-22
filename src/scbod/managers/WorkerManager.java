@@ -1,12 +1,20 @@
-package scbod;
+package scbod.managers;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;
+import scbod.AIClient;
+import scbod.BaseInfo;
+import scbod.ExtractorInfo;
+import scbod.MineralAllocation;
+import scbod.Utility;
 import scbod.Utility.CommonUnitType;
+import scbod.WorkerOrderData;
+import scbod.WorkerOrderData.WorkerOrder;
 
 /**
  * Worker manager controls all the workers and has them all mining minerals.
@@ -17,6 +25,9 @@ import scbod.Utility.CommonUnitType;
  */
 public class WorkerManager extends Manager
 {
+	
+	private ArrayDeque<WorkerOrderData> queuedOrders = new ArrayDeque<WorkerOrderData>();
+	
 
 	/** Holds all of the mineral fields near to a hatchery that should be mined */
 	private ArrayList<MineralAllocation>	mineralFields		= new ArrayList<MineralAllocation>();
@@ -111,7 +122,7 @@ public class WorkerManager extends Manager
 				{
 					return false;
 				}
-				bwapi.gather(worker.getID(), extractorUnit.getID());
+				queueOrder(new WorkerOrderData(WorkerOrder.Gather, worker.getID(), extractorUnit.getID()));
 				globalGasWorkers.add(worker.getID());
 				extractor.gasWorkers.add(worker.getID());
 			}
@@ -448,6 +459,47 @@ public class WorkerManager extends Manager
 						"Min: " + minerals.getDroneCount(), false);
 			}
 		}
+		
+		
+		if (!queuedOrders.isEmpty())
+		{
+			while(!queuedOrders.isEmpty())
+			{
+				WorkerOrderData order = queuedOrders.poll(); 
+				switch(order.orderType)
+				{
+					case Attack:
+						if (order.secondID != Utility.NOT_SET)
+						{
+							System.out.println("Telling worker: " + order.workerID + " to attack unit: " + order.secondID);
+							bwapi.attack(order.workerID, order.secondID);
+						}
+						else
+						{
+							System.out.println("Telling worker: " + order.workerID + " to attack move to: " + order.x + ", " + order.y);
+							bwapi.attack(order.workerID, order.x, order.y);
+						}
+						break;
+					case Build:
+						System.out.println("Telling worker: " + order.workerID + " to build building: " + order.secondID +" at: " + order.x + ", " + order.y);
+						bwapi.build(order.workerID, order.x, order.y, order.secondID);
+						break;
+					case Move:
+						System.out.println("Telling worker: " + order.workerID + " to move to: " + order.x + ", " + order.y);
+						bwapi.move(order.workerID, order.x, order.y);
+						break;
+					case Gather:
+						System.out.println("Telling worker: " + order.workerID + " to gather unit: " + order.secondID);
+						bwapi.gather(order.workerID, order.secondID);
+						break;
+					default:
+						System.out.println("Invalid order queued, moving on...");
+						break;
+				}
+			}
+		}
+		
+		
 	}
 
 	/**
@@ -456,6 +508,24 @@ public class WorkerManager extends Manager
 	public int getWorkerTypeID()
 	{
 		return Utility.getCommonTypeID(CommonUnitType.Worker);
+	}
+	
+	public void queueOrder( WorkerOrderData order)
+	{
+		
+		if( order != null)
+		{
+			if( !isWorkerBusy(order.workerID) )
+			{
+				addBusyWorker(order.workerID);
+			}
+			System.out.println("Queued an order");
+			queuedOrders.add(order);
+		}
+		else
+		{
+			System.out.println("Was given a null order in WorkerManager!");
+		}
 	}
 
 }

@@ -1,5 +1,9 @@
-package scbod;
+package scbod.managers.Zerg;
 
+import scbod.managers.IntelligenceManager;
+import scbod.managers.ScoutManager;
+import scbod.managers.UnitManager;
+import scbod.managers.WorkerManager;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;
