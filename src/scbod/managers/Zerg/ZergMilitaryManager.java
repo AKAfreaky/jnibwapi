@@ -14,18 +14,6 @@ import jnibwapi.types.UnitType.UnitTypes;
 
 public class ZergMilitaryManager extends MilitaryManager
 {
-	/** used for identifying all of the zerglings */
-	private HashSet<Integer>	zerglings		= new HashSet<Integer>();
-
-	/** used for identifying all of the hydralisks */
-	private HashSet<Integer>	hydralisks		= new HashSet<Integer>();
-
-	/** used for identifying all of the mutalisks */
-	private HashSet<Integer>	mutalisks		= new HashSet<Integer>();
-
-	/** used for identifying all of the lurkers */
-	private HashSet<Integer>	lurkers			= new HashSet<Integer>();
-
 	/** A single overlord to take with us  TODO: research why*/
 	private int					overlord;
 	
@@ -36,33 +24,44 @@ public class ZergMilitaryManager extends MilitaryManager
 								WorkerManager workerManager)
 	{
 		super(bwapi, intelligenceManager, unitManager, workerManager);
+		// Initialise these so they aren't null
+		unitGroups.put(UnitTypes.Zerg_Zergling.ordinal(), new HashSet<Integer>());
+		unitGroups.put(UnitTypes.Zerg_Hydralisk.ordinal(), new HashSet<Integer>());
+		unitGroups.put(UnitTypes.Zerg_Mutalisk.ordinal(), new HashSet<Integer>());
+		unitGroups.put(UnitTypes.Zerg_Lurker.ordinal(), new HashSet<Integer>());
 	}
 	
 	
 	public int getHydraliskCount()
 	{
-		return hydralisks.size();
+		return hydralisks().size();
 	}
 	
 	@Override
 	protected void attackUnits()
 	{
 		super.attackUnits();
-		for (int unitID : zerglings)
+		for (int unitID : zerglings())
 		{
 			sendToAttackBasic(unitID);
 		}
-		for (int unitID : hydralisks)
+		for (int unitID : hydralisks())
 		{
 			sendToAttackBasic(unitID);
 		}
-		for (int unitID : mutalisks)
+		for (int unitID : mutalisks())
 		{
 			sendToAttackBasic(unitID);
 		}
-		for (int unitID : lurkers)
+		for (int unitID : lurkers())
 		{
 			Unit unit = bwapi.getUnit(unitID);
+			
+			if (unit  == null)
+			{
+				continue;
+			}
+			
 			Unit target = getHighestPriorityUnit((new Point(unit.getX(), unit.getY())));
 			if (!unit.isBurrowed())
 			{
@@ -101,23 +100,24 @@ public class ZergMilitaryManager extends MilitaryManager
 	protected void moveUnits()
 	{
 		int i = 0;
-		int total = zerglings.size() + hydralisks.size();
-		for (int unitID : zerglings)
+		
+		int total = zerglings().size() + hydralisks().size() + mutalisks().size() + lurkers().size() + ((overlord != Utility.NOT_SET) ? 1 : 0);
+		for (int unitID : zerglings())
 		{
 			moveToDestination(unitID, i, total);
 			i++;
 		}
-		for (int unitID : hydralisks)
+		for (int unitID : hydralisks())
 		{
 			moveToDestination(unitID, i, total);
 			i++;
 		}
-		for (int unitID : mutalisks)
+		for (int unitID : mutalisks())
 		{
 			moveToDestination(unitID, i, total);
 			i++;
 		}
-		for (int unitID : lurkers)
+		for (int unitID : lurkers())
 		{
 			if (bwapi.getUnit(unitID).isBurrowed())
 			{
@@ -148,27 +148,7 @@ public class ZergMilitaryManager extends MilitaryManager
 		Unit unit = bwapi.getUnit(unitID);
 		if (unit.getPlayerID() == bwapi.getSelf().getID())
 		{
-			if (unit.getTypeID() == UnitTypes.Zerg_Zergling.ordinal())
-			{
-				zerglings.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Hydralisk.ordinal())
-			{
-				hydralisks.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Mutalisk.ordinal())
-			{
-				mutalisks.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Lurker.ordinal())
-			{
-				if (hydralisks.contains(unitID))
-				{
-					hydralisks.remove(unitID);
-				}
-				lurkers.add(unitID);
-			}
-			else if (overlord == Utility.NOT_SET && unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal())
+			if (overlord == Utility.NOT_SET && unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal())
 			{
 				overlord = unitID;
 			}
@@ -181,27 +161,7 @@ public class ZergMilitaryManager extends MilitaryManager
 		Unit unit = bwapi.getUnit(unitID);
 		if (unit.getPlayerID() == bwapi.getSelf().getID())
 		{
-			if (unit.getTypeID() == UnitTypes.Zerg_Zergling.ordinal())
-			{
-				zerglings.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Hydralisk.ordinal())
-			{
-				hydralisks.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Mutalisk.ordinal())
-			{
-				mutalisks.add(unitID);
-			}
-			else if (unit.getTypeID() == UnitTypes.Zerg_Lurker.ordinal())
-			{
-				if (hydralisks.contains(unitID))
-				{
-					hydralisks.remove(unitID);
-				}
-				lurkers.add(unitID);
-			}
-			else if (overlord == Utility.NOT_SET && unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal())
+			if (overlord == Utility.NOT_SET && unit.getTypeID() == UnitTypes.Zerg_Overlord.ordinal())
 			{
 				overlord = unitID;
 			}
@@ -211,28 +171,52 @@ public class ZergMilitaryManager extends MilitaryManager
 	public void unitDestroy(int unitID)
 	{
 		super.unitDestroy(unitID);
-		if (zerglings.contains(unitID))
-		{
-			zerglings.remove(unitID);
-		}
-		else if (hydralisks.contains(unitID))
-		{
-			hydralisks.remove(unitID);
-		}
-		else if (mutalisks.contains(unitID))
-		{
-			mutalisks.remove(unitID);
-		}
-		else if (lurkers.contains(unitID))
-		{
-			lurkers.remove(unitID);
-		}
-		else if (unitID == overlord)
+		if (unitID == overlord)
 		{
 			overlord = Utility.NOT_SET;
 			overlord = unitManager.getMyUnitOfType(UnitTypes.Zerg_Overlord.ordinal()).getID();
 		}
 	}
 	
+	
+	private HashSet<Integer> zerglings()
+	{
+		HashSet<Integer> retVal = unitGroups.get(UnitTypes.Zerg_Zergling.ordinal());
+		if (retVal == null)
+		{
+			retVal = new HashSet<Integer>();
+		}
+		return retVal;
+	}
+	
+	private HashSet<Integer> hydralisks()
+	{
+		HashSet<Integer> retVal = unitGroups.get(UnitTypes.Zerg_Hydralisk.ordinal());
+		if (retVal == null)
+		{
+			retVal = new HashSet<Integer>();
+		}
+		return retVal;
+	}
+	
+	private HashSet<Integer> mutalisks()
+	{
+		HashSet<Integer> retVal = unitGroups.get(UnitTypes.Zerg_Mutalisk.ordinal());
+		if (retVal == null)
+		{
+			retVal = new HashSet<Integer>();
+		}
+		return retVal;
+	}
+	
+	private HashSet<Integer> lurkers()
+	{
+		HashSet<Integer> retVal = unitGroups.get(UnitTypes.Zerg_Lurker.ordinal());
+		if (retVal == null)
+		{
+			retVal = new HashSet<Integer>();
+		}
+		return retVal;
+	}
 	
 }

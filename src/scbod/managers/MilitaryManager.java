@@ -66,6 +66,12 @@ public class MilitaryManager extends Manager
 	
 	/** All of the workers */
 	private HashSet<Integer>	workers			= new HashSet<Integer>();
+	
+	/** Groups unit IDs together (V) by their type ID (k)*/
+	protected HashMap<Integer, HashSet<Integer>> unitGroups = new HashMap<Integer, HashSet<Integer>>();
+	
+	/** Keys to the unitGroups for groups considered as part of the army*/
+	protected HashSet<Integer> attackUnits = new HashSet<Integer>();
 
 	/** Set all of the priorities for the units */
 	public void setPriorities()
@@ -339,7 +345,14 @@ public class MilitaryManager extends Manager
 			if (it.hasNext())
 			{
 				ChokePoint chokePoint = it.next();
-				destination = new Point(chokePoint.getCenterX(), chokePoint.getCenterY());
+				if (chokePoint.getFirstRegion().getID()  == startRegion.getID())
+				{
+					destination = new Point(chokePoint.getFirstSideX(), chokePoint.getFirstSideY());
+				}
+				else
+				{
+					destination = new Point(chokePoint.getSecondSideX(), chokePoint.getSecondSideY());
+				}
 			}
 			else
 			{
@@ -513,6 +526,12 @@ public class MilitaryManager extends Manager
 	protected void sendToAttackBasic(int unitID)
 	{
 		Unit unit = bwapi.getUnit(unitID);
+		if (unit == null)
+		{
+			System.out.println("Trying to attack with an invalid unit! (ID: " + unitID);
+			return;
+		}
+		
 		Unit target = getHighestPriorityUnit((new Point(unit.getX(), unit.getY())));
 		if (target != null)
 		{
@@ -615,6 +634,27 @@ public class MilitaryManager extends Manager
 		Unit unit = bwapi.getUnit(unitID);
 		if (unit.getPlayerID() == bwapi.getSelf().getID())
 		{
+			int prevGroup = isUnitInGroups(unitID);
+			if( prevGroup != Utility.NOT_SET)
+			{
+				HashSet<Integer> unitGroup = unitGroups.get(prevGroup);
+				unitGroup.remove(unitID);
+			}
+			
+			
+			HashSet<Integer> unitGroup = unitGroups.get(unit.getTypeID());
+			if(unitGroup == null)
+			{
+				HashSet<Integer> newGroup = new HashSet<Integer>();
+				newGroup.add(unitID);
+				unitGroups.put(unit.getTypeID(), newGroup);
+			}
+			else
+			{
+				unitGroup.add(unitID);
+			}
+				
+			
 			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
 			{
 				workers.add(unitID);
@@ -627,6 +667,20 @@ public class MilitaryManager extends Manager
 		Unit unit = bwapi.getUnit(unitID);
 		if (unit.getPlayerID() == bwapi.getSelf().getID())
 		{
+			
+			HashSet<Integer> unitGroup = unitGroups.get(unit.getTypeID());
+			if(unitGroup == null)
+			{
+				HashSet<Integer> newGroup = new HashSet<Integer>();
+				newGroup.add(unitID);
+				unitGroups.put(unit.getTypeID(), newGroup);
+			}
+			else
+			{
+				unitGroup.add(unitID);
+			}
+			
+			
 			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
 			{
 				workers.add(unitID);
@@ -636,10 +690,31 @@ public class MilitaryManager extends Manager
 
 	public void unitDestroy(int unitID)
 	{
+		int prevGroup = isUnitInGroups(unitID);
+		if( prevGroup != Utility.NOT_SET)
+		{
+			HashSet<Integer> unitGroup = unitGroups.get(prevGroup);
+			unitGroup.remove(unitID);
+		}
+		
+		
 		if (workers.contains(unitID))
 		{
 			workers.remove(unitID);
 		}
+	}
+	
+	private int isUnitInGroups( int unitID )
+	{
+		for(Integer groupKey : unitGroups.keySet())
+		{
+			HashSet<Integer> group = unitGroups.get(groupKey);
+			if(group.contains(unitID))
+			{
+				return groupKey;
+			}
+		}
+		return Utility.NOT_SET;
 	}
 
 }
