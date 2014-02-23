@@ -114,7 +114,7 @@ public class BuildingManager extends Manager
 		int i = 1;
 		for (Point location : buildLocations)
 		{
-			bwapi.drawText(location.x * 32, location.y * 32, Integer.toString(i), false);
+			bwapi.drawText(location.x * 32, location.y * 32, Integer.toString(i) + "(" + location.x + ", " + location.y + ")", false);
 			bwapi.drawBox(location.x * 32, location.y * 32, (location.x + 2) * 32, (location.y + 2) * 32,
 					BWColor.PURPLE, false, false);
 			i++;
@@ -129,24 +129,47 @@ public class BuildingManager extends Manager
 			i++;
 		}
 	}
+	
+	/** Sets locations in the passed directions to null in the passed location list
+	 * Assumes list starts at west and goes clockwise */
+	private void cullLocationsForDirection(Direction dir, Point[] locations)
+	{
+		if (dir != null)
+		{
+			switch (dir)
+			{
+				case East:
+					locations[3] = null;
+					locations[4] = null;
+					locations[5] = null;
+					break;
+				case North:
+					locations[1] = null;
+					locations[2] = null;
+					locations[3] = null;
+					break;
+				case South:
+					locations[5] = null;
+					locations[6] = null;
+					locations[7] = null;
+					break;
+				case West:
+					locations[0] = null;
+					locations[1] = null;
+					locations[7] = null;
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	
 
 	/** Calculates all of the build locations for a given hatchery / expansion */
 	private void calculateBuildLocationsForBase(BaseInfo baseInfo)
 	{
 		Direction mineralDirection = getMineralDirection(baseInfo.structure);
 		Direction geyserDirection = getGeyserDirection(baseInfo.structure);
-
-		int baseCentreX = baseInfo.structure.getTileX() + 2;
-		int baseCentreY = baseInfo.structure.getTileY() + 2;
-		// The start coordinates, which are generally opposite the geyser.
-		int startX = 1;
-		int startY = 0;
-
-		System.out.println("The base center is x: " + baseCentreX + ", y: " + baseCentreY);
-
-		// The build direction, which is the opposite of the minerals
-		int buildX = 0;
-		int buildY = -1;
 
 		if (geyserDirection != null)
 		{
@@ -156,94 +179,38 @@ public class BuildingManager extends Manager
 		{
 			System.out.println("Mineral direction : " + mineralDirection.toString());
 		}
-
-		// TODO: This goes on the assumption that geyser direction is
-		// never opposite of minerals. Should work for most maps
-		if (geyserDirection != null)
+		
+		// The tile edges of the base structure
+		int baseLeft	= baseInfo.structure.getTileX();
+		int baseTop		= baseInfo.structure.getTileY();
+		int baseRight	= baseLeft	+	bwapi.getUnitType(baseInfo.structure.getTypeID()).getTileWidth();
+		int baseBottom	= baseTop	+	bwapi.getUnitType(baseInfo.structure.getTypeID()).getTileHeight();
+		
+		// Default locations in all cardinal directions
+		Point[] locations = {	
+								new Point(baseLeft	- 5	, baseTop),	
+								new Point(baseLeft	- 5	, baseTop - 3),
+								new Point(baseLeft		, baseTop - 4),
+								new Point(baseRight	+ 2	, baseTop - 4),
+								new Point(baseRight	+ 2	, baseTop), 
+								new Point(baseRight	+ 2	, baseBottom + 2),
+								new Point(baseLeft		, baseBottom + 2),
+								new Point(baseLeft	- 5	, baseBottom + 2)
+							};
+		
+		
+		cullLocationsForDirection(geyserDirection, locations);
+		cullLocationsForDirection(mineralDirection, locations);
+		
+		for(Point loc : locations)
 		{
-			switch (geyserDirection)
+			if (loc != null)
 			{
-				case East:
-					startX = -1;
-					startY = 0;
-					break;
-				case South:
-					startX = 0;
-					startY = -1;
-					break;
-				case West:
-					startX = 1;
-					startY = 0;
-					break;
-				case North:
-					startX = 0;
-					startY = 1;
-					break;
+				buildLocations.add(loc);
+				baseInfo.buildingIndexes.add(buildLocations.size() - 1);
 			}
 		}
-		if (mineralDirection != null)
-		{
-			switch (mineralDirection)
-			{
-				case East:
-					buildX = -1;
-					buildY = 0;
-					break;
-				case South:
-					buildX = 0;
-					buildY = -1;
-					break;
-				case West:
-					buildX = 1;
-					buildY = 0;
-					break;
-				case North:
-					buildX = 0;
-					buildY = 1;
-					break;
-			}
-		}
-		int negativeStartValueX = 0;
-		// For negative values, boost by an extra 2 due to the fact that
-		// these points are the top left point
-		if (startX == -1)
-		{
-			negativeStartValueX = -2;
-		}
-		int negativeBuildValueX = 0;
-		// For negative values, boost by an extra 2 due to the fact that
-		// these points are the top left point
-		if (buildX == -1)
-		{
-			negativeBuildValueX = -2;
-		}
-		int negativeStartValueY = 0;
-		// For negative values, boost by an extra 2 due to the fact that
-		// these points are the top left point
-		if (startY == -1)
-		{
-			negativeStartValueY = -2;
-		}
-		int negativeBuildValueY = 0;
-		// For negative values, boost by an extra 2 due to the fact that
-		// these points are the top left point
-		if (buildY == -1)
-		{
-			negativeBuildValueY = -2;
-		}
-		buildLocations.add(new Point(baseCentreX
-				+ ((startX * 2 + negativeStartValueX) + (buildX * -1 + negativeBuildValueX)), baseCentreY
-				+ ((startY * 2 + negativeStartValueY) + (buildY * -1 + negativeBuildValueY))));
-		baseInfo.buildingIndexes.add(buildLocations.size() - 1);
-		buildLocations.add(new Point(baseCentreX
-				+ ((startX * 2 + negativeStartValueX) + (buildX * 3 + negativeBuildValueX)), baseCentreY
-				+ ((startY * 2 + negativeStartValueY) + (buildY * 3 + negativeBuildValueY))));
-		baseInfo.buildingIndexes.add(buildLocations.size() - 1);
-		buildLocations.add(new Point(baseCentreX
-				+ ((startX * -3 + negativeStartValueX) + (buildX * 3 + negativeBuildValueX)), baseCentreY
-				+ ((startY * -3 + negativeStartValueY) + (buildY * 3 + negativeBuildValueY))));
-		baseInfo.buildingIndexes.add(buildLocations.size() - 1);
-
+		
 		// Defence location is updated to be the last ones, so that defences are
 		// built at expansions first.
 		nextDefenceLocation = buildLocations.size() - 1;
@@ -260,7 +227,7 @@ public class BuildingManager extends Manager
 		try
 		{
 			int index = nextBuildLocation;
-			nextBuildLocation = (nextBuildLocation + 1) % (buildLocations.size() - 1);
+			nextBuildLocation = (nextBuildLocation + 1) % (buildLocations.size());
 			return buildLocations.get(index);
 		}
 		catch (Exception e)
@@ -475,7 +442,7 @@ public class BuildingManager extends Manager
 		return true;
 	}
 
-	/** Builds a Zerg Extractor on the nearest free geyser */
+	/** Builds a gas extraction building on the nearest free geyser */
 	public boolean buildExtractor()
 	{
 		/* First find the closest drone to the geyser */
@@ -531,6 +498,7 @@ public class BuildingManager extends Manager
 		if (worker == null)
 		{
 			System.out.println("No free worker!");
+			return;
 		}
 
 		workerManager.addBusyWorker(worker.getID());
@@ -1104,5 +1072,25 @@ public class BuildingManager extends Manager
 			workerManager.removeBusyWorker(unitID);
 			builders.remove(Integer.valueOf(unitID));
 		}
+	}
+	
+	public int getNearestTownHall(int unitID)
+	{
+		Point unitLoc = new Point(bwapi.getUnit(unitID).getX(), bwapi.getUnit(unitID).getY());
+		double nearestDistance = Utility.NOT_SET;
+		int nearestUnit = Utility.NOT_SET;
+		for(BaseInfo base : baseBuildings)
+		{
+			double distance = Utility.getDistance(unitLoc.x, unitLoc.y, base.location.x, base.location.y);
+			
+			if( nearestUnit == Utility.NOT_SET || distance < nearestDistance)
+			{
+				nearestUnit		= base.structure.getID();
+				nearestDistance	= distance;
+			}
+			
+		}
+		
+		return nearestUnit;
 	}
 }
