@@ -28,13 +28,15 @@ public class TerranProductionManager extends ProductionManager {
 	public boolean trainSCV()
 	{
 		boolean ccExists = false;
+		
 		for(Unit unit : bwapi.getMyUnits())
 		{
 			if(unit.getTypeID() == UnitTypes.Terran_Command_Center.ordinal())
 			{
 				if( resourceManager.getMineralCount() >= 50 && resourceManager.getSupplyAvailable() >= 1)
 				{
-					return bwapi.train(unit.getID(), UnitTypes.Terran_SCV.ordinal());
+					bwapi.train(unit.getID(), UnitTypes.Terran_SCV.ordinal());
+					return true;
 				}
 				else
 				{
@@ -46,6 +48,35 @@ public class TerranProductionManager extends ProductionManager {
 		}
 		
 		if (!ccExists)
+		{
+			System.out.println("No command center found (!!!)");
+		}
+		
+		
+		return false;
+	}
+	
+	public boolean trainMarine()
+	{
+		boolean raxExists = false;
+		
+		Unit rax = buildingManager.getLeastBusyBarracks();
+		
+		if (rax != null)
+		{
+			raxExists = true;
+			if( resourceManager.getMineralCount() >= 50 && resourceManager.getSupplyAvailable() >= 1)
+			{
+				bwapi.train(rax.getID(), UnitTypes.Terran_Marine.ordinal());
+				return true;
+			}
+			else
+			{
+				System.out.println("Don't have the supply or minerals to build an SCV");
+			}
+		}
+		
+		if (!raxExists)
 		{
 			System.out.println("No command center found (!!!)");
 		}
