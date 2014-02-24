@@ -47,7 +47,7 @@ public class BuildingManager extends Manager
 
 	/** Index into the buildLocations array */
 	private int						nextBuildLocation;
-	private int						nextDefenceLocation;
+	protected int						nextDefenceLocation;
 
 	/**
 	 * Expansion locations, this is a list of expansion locations that should
@@ -59,7 +59,7 @@ public class BuildingManager extends Manager
 	private int						nextExpansionLocation;
 
 	// Info used for generating new building locations
-	private ArrayList<BaseInfo>		baseBuildings		= new ArrayList<BaseInfo>();
+	protected ArrayList<BaseInfo>	baseBuildings		= new ArrayList<BaseInfo>();
 
 	/* Index for the next expansion */
 	private int						expansionIndex;
@@ -132,7 +132,7 @@ public class BuildingManager extends Manager
 	
 	/** Sets locations in the passed directions to null in the passed location list
 	 * Assumes list starts at west and goes clockwise */
-	private void cullLocationsForDirection(Direction dir, Point[] locations)
+	protected void cullLocationsForDirection(Direction dir, Point[] locations)
 	{
 		if (dir != null)
 		{
@@ -166,7 +166,7 @@ public class BuildingManager extends Manager
 	
 
 	/** Calculates all of the build locations for a given hatchery / expansion */
-	private void calculateBuildLocationsForBase(BaseInfo baseInfo)
+	protected void calculateBuildLocationsForBase(BaseInfo baseInfo)
 	{
 		Direction mineralDirection = getMineralDirection(baseInfo.structure);
 		Direction geyserDirection = getGeyserDirection(baseInfo.structure);

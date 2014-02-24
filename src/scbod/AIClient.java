@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import scbod.Utility.CommonUnitType;
 import scbod.managers.*;
+import scbod.managers.Protoss.ProtossBuildingManager;
+import scbod.managers.Protoss.ProtossProductionManager;
 import scbod.managers.Terran.*;
 import scbod.managers.Zerg.*;
 import jnibwapi.BWAPIEventListener;
@@ -124,10 +126,19 @@ public class AIClient implements BWAPIEventListener, Runnable
 		}
 		else if ( Utility.getRace() == RaceTypes.Terran)
 		{
-			System.out.println("Terran");
+			System.out.println("One ornery son of a bitch");
 			intelligenceManager	= new IntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
 			buildingManager		= new TerranBuildingManager(bwapi, unitManager, workerManager, resourceManager);
 			productionManager	= new TerranProductionManager(bwapi, resourceManager, buildingManager);
+			militaryManager		= new TerranMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
+			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager);
+		}
+		else if ( Utility.getRace() == RaceTypes.Protoss)
+		{
+			System.out.println("I can crush you with my mind!");
+			intelligenceManager	= new IntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
+			buildingManager		= new ProtossBuildingManager(bwapi, unitManager, workerManager, resourceManager);
+			productionManager	= new ProtossProductionManager(bwapi, resourceManager, buildingManager);
 			militaryManager		= new MilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
 			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager);
 		}
