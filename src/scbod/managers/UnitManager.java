@@ -79,4 +79,19 @@ public class UnitManager extends Manager
 		}
 		return retList;
 	}
+	
+	public ArrayList<Unit> getMyUnFinishedUnitsOfType(int typeID)
+	{
+		ArrayList<Unit> retList = new ArrayList<Unit>();
+		for (Unit unit : bwapi.getMyUnits())
+		{
+			if (unit.getTypeID() == typeID && (!unit.isCompleted()))
+			{
+				retList.add(unit);
+			}
+		}
+		return retList;
+	}
+	
+	
 }

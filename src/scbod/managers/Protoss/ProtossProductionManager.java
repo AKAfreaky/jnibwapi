@@ -21,8 +21,8 @@ public class ProtossProductionManager extends ProductionManager
 	@Override
 	public void gameUpdate()
 	{
-		// TODO: update with the number of probes being built
-		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal());
+		int incomingSupply = buildingManager.getUnfinishedPylonCount() * 8; 
+		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal() + incomingSupply);
 	}
 	
 	
@@ -56,6 +56,27 @@ public class ProtossProductionManager extends ProductionManager
 		
 		return false;
 	}
+	
+	public boolean trainZealot()
+	{
+		Unit gateway = buildingManager.getLeastBusyGateway();
+		
+		if (gateway != null)
+		{
+			if( resourceManager.getMineralCount() >= 100 && resourceManager.getSupplyAvailable() >= 1)
+			{
+				bwapi.train(gateway.getID(), UnitTypes.Protoss_Zealot.ordinal());
+				return true;
+			}
+			else
+			{
+				System.out.println("Don't have the supply or minerals to build a zealot");
+			}
+		}
+		
+		return false;
+	}
+	
 	
 	
 

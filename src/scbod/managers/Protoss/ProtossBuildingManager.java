@@ -3,9 +3,11 @@ package scbod.managers.Protoss;
 import java.awt.Point;
 
 import jnibwapi.JNIBWAPI;
+import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;
 import scbod.BaseInfo;
 import scbod.Direction;
+import scbod.Utility;
 import scbod.managers.BuildingManager;
 import scbod.managers.ResourceManager;
 import scbod.managers.UnitManager;
@@ -36,10 +38,33 @@ public class ProtossBuildingManager extends BuildingManager
 			return false;
 	}
 	
-	/** The number of completed pylons */
+	/** The number of pylons */
 	public int pylonCount()
 	{
-		return (unitManager.getMyUnitsOfType(UnitTypes.Protoss_Pylon.ordinal(), true).size());
+		return (unitManager.getMyUnitsOfType(UnitTypes.Protoss_Pylon.ordinal(), false).size());
+	}
+	
+	/** Get a probe to summon a gateway*/ 
+	public boolean buildGateway()
+	{
+		if (resourceManager.getMineralCount() < 150)
+		{
+			System.out.println("Need 150 minerals to build a gateway");
+			return false;
+		}
+	
+		Point buildLocation = getNextBuildLocation();
+	
+		if (buildBuilding(UnitTypes.Protoss_Gateway.ordinal(), buildLocation.x, buildLocation.y))
+			return true;
+		else
+			return false;
+	}
+	
+	/** The number of gateways */
+	public int gatewayCount()
+	{
+		return (unitManager.getMyUnitsOfType(UnitTypes.Protoss_Gateway.ordinal(), false).size());
 	}
 	
 	/** Calculates all of the build locations for a given hatchery / expansion */
@@ -121,5 +146,28 @@ public class ProtossBuildingManager extends BuildingManager
 		
 	}
 	
+	public Unit getLeastBusyGateway()
+	{
+		// Totally not copied from the terran...
+		Unit chosenRax = null;
+		int smallestQueue = Utility.NOT_SET;
+		
+		for(Unit unit : unitManager.getMyUnitsOfType(UnitTypes.Protoss_Gateway.ordinal(), true))
+		{
+			int queue = unit.getTrainingQueueSize();
+			if(chosenRax == null || queue < smallestQueue)
+			{
+				chosenRax		= unit;
+				smallestQueue	= queue;
+			}
+		}
+		
+		return chosenRax;
+	}
+	
+	public int getUnfinishedPylonCount()
+	{
+		return( unitManager.getMyUnFinishedUnitsOfType(UnitTypes.Protoss_Pylon.ordinal()).size());
+	}
 	
 }
