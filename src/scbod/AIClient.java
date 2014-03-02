@@ -4,8 +4,7 @@ import java.util.ArrayList;
 
 import scbod.Utility.CommonUnitType;
 import scbod.managers.*;
-import scbod.managers.Protoss.ProtossBuildingManager;
-import scbod.managers.Protoss.ProtossProductionManager;
+import scbod.managers.Protoss.*;
 import scbod.managers.Terran.*;
 import scbod.managers.Zerg.*;
 import jnibwapi.BWAPIEventListener;
@@ -139,7 +138,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 			intelligenceManager	= new IntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
 			buildingManager		= new ProtossBuildingManager(bwapi, unitManager, workerManager, resourceManager);
 			productionManager	= new ProtossProductionManager(bwapi, resourceManager, buildingManager);
-			militaryManager		= new MilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
+			militaryManager		= new ProtossMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
 			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager);
 		}
 		
@@ -372,5 +371,12 @@ public class AIClient implements BWAPIEventListener, Runnable
 	{
 		// TODO Auto-generated method stub
 		System.out.println("playerDropped!");
+	}
+	
+	/** Nothing for the POSH plan to do right now. 
+	 *  Not really sure if this will be useful*/
+	public boolean idle()
+	{
+		return true;
 	}
 }
