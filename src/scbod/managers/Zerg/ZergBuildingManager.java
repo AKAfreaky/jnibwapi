@@ -14,6 +14,11 @@ import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType;
 import jnibwapi.types.UnitType.UnitTypes;
 
+/**
+ * Zerg Building Manager * * *
+ * 
+ * Zerg specific actions related to building stuff
+ */
 public class ZergBuildingManager extends BuildingManager
 {
 	private ArrayList<BaseInfo>	creepColonies	= new ArrayList<BaseInfo>();

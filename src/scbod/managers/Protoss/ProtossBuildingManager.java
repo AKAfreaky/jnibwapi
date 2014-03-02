@@ -13,6 +13,11 @@ import scbod.managers.ResourceManager;
 import scbod.managers.UnitManager;
 import scbod.managers.WorkerManager;
 
+/**
+ * Protoss Building Manager * * *
+ * 
+ * Protoss specific actions related to building stuff
+ */
 public class ProtossBuildingManager extends BuildingManager
 {
 	public ProtossBuildingManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager,
@@ -94,11 +99,11 @@ public class ProtossBuildingManager extends BuildingManager
 								new Point(baseLeft	- 7	, baseTop),	
 								new Point(baseLeft	- 7	, baseTop - 7),
 								new Point(baseLeft		, baseTop - 7),
-								new Point(baseRight	+ 7	, baseTop - 7),
-								new Point(baseRight	+ 7	, baseTop), 
-								new Point(baseRight	+ 7	, baseBottom + 7),
-								new Point(baseLeft		, baseBottom + 7),
-								new Point(baseLeft	- 7	, baseBottom + 7)
+								new Point(baseRight	+ 6	, baseTop - 7),
+								new Point(baseRight	+ 6	, baseTop), 
+								new Point(baseRight	+ 6	, baseBottom + 5),
+								new Point(baseLeft		, baseBottom + 5),
+								new Point(baseLeft	- 7	, baseBottom + 5)
 							};
 		
 		

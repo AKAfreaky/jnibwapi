@@ -11,6 +11,11 @@ import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;
 
+/**
+ * Terran Building Manager * * *
+ * 
+ * Terran specific actions related to building stuff
+ */
 public class TerranBuildingManager extends BuildingManager 
 {
 	public TerranBuildingManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager,
