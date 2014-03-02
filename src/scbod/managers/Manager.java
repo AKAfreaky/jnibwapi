@@ -12,4 +12,6 @@ public abstract class Manager {
 	public void unitHide(int unitID){}
 	public void unitMorph(int unitID){}
 	public void unitShow(int unitID){}
+	public void unitComplete(int unitID){}
+	public void unitRenegade(int unitID){}
 }

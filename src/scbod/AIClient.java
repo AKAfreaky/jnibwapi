@@ -240,18 +240,22 @@ public class AIClient implements BWAPIEventListener, Runnable
 
 	public void matchEnded(boolean winner)
 	{
+		System.out.println("matchEnded!");
 	}
 
 	public void nukeDetect(int x, int y)
 	{
+		System.out.println("nukeDetect! xy");
 	}
 
 	public void nukeDetect()
 	{
+		System.out.println("nukeDetect!");
 	}
 
 	public void playerLeft(int id)
 	{
+		System.out.println("playerLeft!");
 	}
 
 	public void unitCreate(int unitID)
@@ -323,41 +327,50 @@ public class AIClient implements BWAPIEventListener, Runnable
 	public void sendText(String text)
 	{
 		// TODO Auto-generated method stub
-
+		System.out.println("sendText!");
 	}
 
 	@Override
 	public void receiveText(String text)
 	{
 		// TODO Auto-generated method stub
-
+		System.out.println("receiveText!");
 	}
 
 	@Override
 	public void unitRenegade(int unitID)
 	{
-		// TODO Auto-generated method stub
-
+		System.out.println("unitRenegade!");
+		
+		// Call managers
+		for (Manager manager : managers)
+		{
+			manager.unitRenegade(unitID);
+		}
 	}
 
 	@Override
 	public void saveGame(String gameName)
 	{
 		// TODO Auto-generated method stub
-
+		System.out.println("saveGame!");
 	}
 
 	@Override
 	public void unitComplete(int unitID)
 	{
-		// TODO Auto-generated method stub
-
+		System.out.println("unitComplete!");
+		// Call managers
+		for (Manager manager : managers)
+		{
+			manager.unitComplete(unitID);
+		}
 	}
 
 	@Override
 	public void playerDropped(int playerID)
 	{
 		// TODO Auto-generated method stub
-
+		System.out.println("playerDropped!");
 	}
 }
