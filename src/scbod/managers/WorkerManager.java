@@ -107,6 +107,12 @@ public class WorkerManager extends Manager
 			Unit extractorUnit = bwapi.getUnit(extractor.geyserID);
 			Unit worker = null;
 
+			// Can't assign units to an incomplete extractor
+			if( !extractorUnit.isCompleted())
+			{
+				continue;
+			}
+			
 			/* Already have enough workers, don't want anymore */
 			if (extractor.gasWorkers.size() >= 3)
 			{
@@ -122,6 +128,7 @@ public class WorkerManager extends Manager
 				{
 					return false;
 				}
+				System.out.println("Queing the gas order");
 				queueOrder(new WorkerOrderData(WorkerOrder.Gather, worker.getID(), extractorUnit.getID()));
 				globalGasWorkers.add(worker.getID());
 				extractor.gasWorkers.add(worker.getID());
@@ -137,7 +144,7 @@ public class WorkerManager extends Manager
 		// Find the nearest drone
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			if (unit.getTypeID() == workerTypeID && !isWorkerBusy(unit.getID()) && !isGasWorker(unit.getID()))
+			if (unit.getTypeID() == workerTypeID && !isWorkerBusy(unit.getID()) && !isGasWorker(unit.getID()) && unit.isCompleted())
 			{
 				double workerDistance = Utility.getDistance(tileX, tileY, unit.getTileX(), unit.getTileY());
 				if (worker == null || workerDistance < currentShortestDistance)
@@ -405,7 +412,7 @@ public class WorkerManager extends Manager
 			{
 				workers.add(unitID);
 			}
-			if (unit.getTypeID() == UnitTypes.Zerg_Extractor.ordinal())
+			if (unit.getTypeID() == Utility.getCommonTypeID(CommonUnitType.Extractor))
 			{
 				extractors.add(new ExtractorInfo(unitID));
 			}
@@ -458,6 +465,11 @@ public class WorkerManager extends Manager
 				bwapi.drawText(minerals.getLocation().x, minerals.getLocation().y + 16,
 						"Min: " + minerals.getDroneCount(), false);
 			}
+		}
+		
+		if(globalGasWorkers.size() < extractors.size() * 3)
+		{
+			startCollectingGas();
 		}
 		
 		
@@ -527,5 +539,5 @@ public class WorkerManager extends Manager
 			System.out.println("Was given a null order in WorkerManager!");
 		}
 	}
-
+	
 }
