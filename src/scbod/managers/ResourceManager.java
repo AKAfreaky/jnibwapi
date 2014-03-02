@@ -94,6 +94,8 @@ public class ResourceManager extends Manager{
 		// Update game info
 		Player playerInfo = bwapi.getSelf();
 		
+		//System.out.println("Supply: (" + playerInfo.getSupplyUsed() + "/" + playerInfo.getSupplyTotal() + ")");
+		
 		setSupplyTotal(playerInfo.getSupplyTotal());
 		setSupplyUsed(playerInfo.getSupplyUsed());
 		setMineralCount(playerInfo.getMinerals());
