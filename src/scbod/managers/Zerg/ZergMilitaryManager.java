@@ -41,19 +41,25 @@ public class ZergMilitaryManager extends MilitaryManager
 	protected void attackUnits()
 	{
 		super.attackUnits();
-		for (int unitID : zerglings())
+		
+		HashSet<Integer> zerglings = zerglings();
+		HashSet<Integer> hydralisks = hydralisks();
+		HashSet<Integer> mutalisks = mutalisks();
+		HashSet<Integer> lurkers = lurkers();
+		
+		for (int unitID : zerglings)
 		{
 			sendToAttackBasic(unitID);
 		}
-		for (int unitID : hydralisks())
+		for (int unitID : hydralisks)
 		{
 			sendToAttackBasic(unitID);
 		}
-		for (int unitID : mutalisks())
+		for (int unitID : mutalisks)
 		{
 			sendToAttackBasic(unitID);
 		}
-		for (int unitID : lurkers())
+		for (int unitID : lurkers)
 		{
 			Unit unit = bwapi.getUnit(unitID);
 			
@@ -100,24 +106,29 @@ public class ZergMilitaryManager extends MilitaryManager
 	protected void moveUnits()
 	{
 		int i = 0;
+		HashSet<Integer> zerglings = zerglings();
+		HashSet<Integer> hydralisks = hydralisks();
+		HashSet<Integer> mutalisks = mutalisks();
+		HashSet<Integer> lurkers = lurkers();
+		
 		
 		int total = zerglings().size() + hydralisks().size() + mutalisks().size() + lurkers().size() + ((overlord != Utility.NOT_SET) ? 1 : 0);
-		for (int unitID : zerglings())
+		for (int unitID : zerglings)
 		{
 			moveToDestination(unitID, i, total);
 			i++;
 		}
-		for (int unitID : hydralisks())
+		for (int unitID : hydralisks)
 		{
 			moveToDestination(unitID, i, total);
 			i++;
 		}
-		for (int unitID : mutalisks())
+		for (int unitID : mutalisks)
 		{
 			moveToDestination(unitID, i, total);
 			i++;
 		}
-		for (int unitID : lurkers())
+		for (int unitID : lurkers)
 		{
 			if (bwapi.getUnit(unitID).isBurrowed())
 			{
