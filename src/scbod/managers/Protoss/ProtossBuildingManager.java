@@ -26,52 +26,6 @@ public class ProtossBuildingManager extends BuildingManager
 		super(bwapi, unitManager, workerManager, resourceManager);
 	}
 	
-	/** Get a probe to summon a pylon*/ 
-	public boolean buildPylon()
-	{
-		if (resourceManager.getMineralCount() < 100)
-		{
-			System.out.println("Need 100 minerals to build a pylon");
-			return false;
-		}
-	
-		Point buildLocation = getNextBuildLocation();
-	
-		if (buildBuilding(UnitTypes.Protoss_Pylon.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-	
-	/** The number of pylons */
-	public int pylonCount()
-	{
-		return (unitManager.getMyUnitsOfType(UnitTypes.Protoss_Pylon.ordinal(), false).size());
-	}
-	
-	/** Get a probe to summon a gateway*/ 
-	public boolean buildGateway()
-	{
-		if (resourceManager.getMineralCount() < 150)
-		{
-			System.out.println("Need 150 minerals to build a gateway");
-			return false;
-		}
-	
-		Point buildLocation = getNextBuildLocation();
-	
-		if (buildBuilding(UnitTypes.Protoss_Gateway.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-	
-	/** The number of gateways */
-	public int gatewayCount()
-	{
-		return (unitManager.getMyUnitsOfType(UnitTypes.Protoss_Gateway.ordinal(), false).size());
-	}
-	
 	/** Calculates all of the build locations for a given hatchery / expansion */
 	@Override
 	protected void calculateBuildLocationsForBase(BaseInfo baseInfo)
@@ -170,9 +124,91 @@ public class ProtossBuildingManager extends BuildingManager
 		return chosenRax;
 	}
 	
+	/** Get a probe to summon a pylon*/ 
+	public boolean buildPylon()
+	{
+		if (resourceManager.getMineralCount() < 100)
+		{
+			System.out.println("Need 100 minerals to build a pylon");
+			return false;
+		}
+	
+		Point buildLocation = getNextBuildLocation();
+	
+		if (buildBuilding(UnitTypes.Protoss_Pylon.ordinal(), buildLocation.x, buildLocation.y))
+			return true;
+		else
+			return false;
+	}
+	
+	/** The number of pylons */
+	public int getPylonCount()
+	{
+		return (unitManager.getMyUnitsOfType(UnitTypes.Protoss_Pylon.ordinal(), false).size());
+	}
+	
+	/** The number of pylons still warping in */
 	public int getUnfinishedPylonCount()
 	{
 		return( unitManager.getMyUnFinishedUnitsOfType(UnitTypes.Protoss_Pylon.ordinal()).size());
+	}
+	
+	/** Get a probe to summon a gateway*/ 
+	public boolean buildGateway()
+	{
+		if (resourceManager.getMineralCount() < 150)
+		{
+			System.out.println("Need 150 minerals to build a gateway");
+			return false;
+		}
+	
+		Point buildLocation = getNextBuildLocation();
+	
+		if (buildBuilding(UnitTypes.Protoss_Gateway.ordinal(), buildLocation.x, buildLocation.y))
+			return true;
+		else
+			return false;
+	}
+	
+	/** The number of summoned gateways */
+	public int getGatewayCount()
+	{
+		return (unitManager.getMyUnitsOfType(UnitTypes.Protoss_Gateway.ordinal(), false).size());
+	}
+	
+	/** The number of gateways ready to build */
+	public int getCompletedGatewayCount()
+	{
+		return( unitManager.getUnitCount(UnitTypes.Protoss_Gateway.ordinal(), true));
+	}
+	
+	/** Get a probe to summon a forge*/ 
+	public boolean buildForge()
+	{
+		if (resourceManager.getMineralCount() < 150)
+		{
+			System.out.println("Need 150 minerals to build a forge");
+			return false;
+		}
+	
+		Point buildLocation = getNextBuildLocation();
+	
+		if (buildBuilding(UnitTypes.Protoss_Forge.ordinal(), buildLocation.x, buildLocation.y))
+			return true;
+		else
+			return false;
+	}
+	
+	/** How many Forges have been summoned */
+	public int getForgeCount()
+	{
+		return( unitManager.getUnitCount(UnitTypes.Protoss_Forge.ordinal(), false));
+	}
+	
+	/** How many Forges are ready to research */
+	public int getCompletedForgeCount()
+	{
+		return( unitManager.getUnitCount(UnitTypes.Protoss_Forge.ordinal(), true)); 
 	}
 	
 }
