@@ -23,6 +23,7 @@ import jnibwapi.types.UnitType.UnitTypes;
 import jnibwapi.util.BWColor;
 import scbod.WorkerOrderData;
 import scbod.WorkerOrderData.WorkerOrder;
+import scbod.BuildLocations;
 
 /**
  * Building Manager * * *
@@ -43,7 +44,7 @@ public class BuildingManager extends Manager
 	 * of the game and when new hatcheries or creep colonies are built, and
 	 * these determine where buildings should be placed
 	 */
-	protected ArrayList<Point>		buildLocations		= new ArrayList<Point>();
+	protected BuildLocations		buildLocations		= new BuildLocations();
 
 	/** Index into the buildLocations array */
 	private int						nextBuildLocation;
