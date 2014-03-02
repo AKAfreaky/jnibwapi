@@ -631,72 +631,17 @@ public class MilitaryManager extends Manager
 
 	public void unitMorph(int unitID)
 	{
-		Unit unit = bwapi.getUnit(unitID);
-		if (unit.getPlayerID() == bwapi.getSelf().getID())
-		{
-			int prevGroup = isUnitInGroups(unitID);
-			if( prevGroup != Utility.NOT_SET)
-			{
-				HashSet<Integer> unitGroup = unitGroups.get(prevGroup);
-				unitGroup.remove(unitID);
-			}
-			
-			
-			HashSet<Integer> unitGroup = unitGroups.get(unit.getTypeID());
-			if(unitGroup == null)
-			{
-				HashSet<Integer> newGroup = new HashSet<Integer>();
-				newGroup.add(unitID);
-				unitGroups.put(unit.getTypeID(), newGroup);
-			}
-			else
-			{
-				unitGroup.add(unitID);
-			}
-				
-			
-			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
-			{
-				workers.add(unitID);
-			}
-		}
+		groupUnit(unitID, false);
 	}
 
 	public void unitCreate(int unitID)
 	{
-		Unit unit = bwapi.getUnit(unitID);
-		if (unit.getPlayerID() == bwapi.getSelf().getID())
-		{
-			
-			HashSet<Integer> unitGroup = unitGroups.get(unit.getTypeID());
-			if(unitGroup == null)
-			{
-				HashSet<Integer> newGroup = new HashSet<Integer>();
-				newGroup.add(unitID);
-				unitGroups.put(unit.getTypeID(), newGroup);
-			}
-			else
-			{
-				unitGroup.add(unitID);
-			}
-			
-			
-			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
-			{
-				workers.add(unitID);
-			}
-		}
+		groupUnit(unitID, true);
 	}
 
 	public void unitDestroy(int unitID)
 	{
-		int prevGroup = isUnitInGroups(unitID);
-		if( prevGroup != Utility.NOT_SET)
-		{
-			HashSet<Integer> unitGroup = unitGroups.get(prevGroup);
-			unitGroup.remove(unitID);
-		}
-		
+		removeFromGroups(unitID);		
 		
 		if (workers.contains(unitID))
 		{
@@ -715,6 +660,46 @@ public class MilitaryManager extends Manager
 			}
 		}
 		return Utility.NOT_SET;
+	}
+	
+	private void groupUnit( int unitID, boolean newUnit )
+	{
+		Unit unit = bwapi.getUnit(unitID);
+		if (unit.getPlayerID() == bwapi.getSelf().getID())
+		{
+			if(!newUnit)
+			{
+				removeFromGroups(unitID);
+			}			
+			
+			HashSet<Integer> unitGroup = unitGroups.get(unit.getTypeID());
+			if(unitGroup == null)
+			{
+				HashSet<Integer> newGroup = new HashSet<Integer>();
+				newGroup.add(unitID);
+				unitGroups.put(unit.getTypeID(), newGroup);
+			}
+			else
+			{
+				unitGroup.add(unitID);
+			}
+			
+			
+			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
+			{
+				workers.add(unitID);
+			}
+		}
+	}
+	
+	private void removeFromGroups(int unitID)
+	{
+		int prevGroup = isUnitInGroups(unitID);
+		if( prevGroup != Utility.NOT_SET)
+		{
+			HashSet<Integer> unitGroup = unitGroups.get(prevGroup);
+			unitGroup.remove(unitID);
+		}
 	}
 
 }
