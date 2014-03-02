@@ -28,28 +28,57 @@ public class TerranMilitaryManager extends MilitaryManager
 	{
 		int i = 0;
 		
-		int total = marines().size() + medics().size();
-		for (int unitID : marines())
+		HashSet<Integer> marines = marines();
+		HashSet<Integer> medics = medics();
+		
+		int total = marines.size() + medics.size();
+		for (int unitID : marines)
 		{
 			moveToDestination(unitID, i, total);
 			i++;
 		}
-		for (int unitID : medics())
+		for (int unitID : medics)
 		{
 			moveToDestination(unitID, i, total);
 			i++;
 		}
 	}
 	
-	
+	@Override
+	protected void attackUnits()
+	{
+		super.attackUnits();
+		
+		HashSet<Integer> marines = marines();
+		HashSet<Integer> medics = medics();
+		
+		for (int unitID : marines)
+		{
+			sendToAttackBasic(unitID);
+		}
+		for (int unitID : medics)
+		{
+			sendToAttackBasic(unitID);
+		}
+	}
 	
 	private HashSet<Integer> marines()
 	{
-		return unitGroups.get(UnitTypes.Terran_Marine.ordinal());
+		HashSet<Integer> retVal = unitGroups.get(UnitTypes.Terran_Marine.ordinal());
+		if (retVal == null)
+		{
+			retVal = new HashSet<Integer>();
+		}
+		return retVal;
 	}
 	
 	private HashSet<Integer> medics()
 	{
-		return unitGroups.get(UnitTypes.Terran_Medic.ordinal());
+		HashSet<Integer> retVal = unitGroups.get(UnitTypes.Terran_Medic.ordinal());
+		if (retVal == null)
+		{
+			retVal = new HashSet<Integer>();
+		}
+		return retVal;
 	}
 }
