@@ -77,6 +77,30 @@ public class TerranBuildingManager extends BuildingManager
 		return unitManager.getUnitCount(UnitTypes.Terran_Barracks.ordinal(), true);
 	}
 	
+	public boolean buildAcademy()
+	{
+		if(unitManager.getMyUnitOfType(UnitTypes.Terran_Barracks.ordinal(), true) != null)
+		{
+			System.out.println("Building Academy");
+			if (resourceManager.getMineralCount() < 150)
+			{
+				System.out.println("Need 150 minerals to build an Academy");
+				return false;
+			}
+			
+			Point buildLocation = getNextBuildLocation();
+			
+			if(buildBuilding(UnitTypes.Terran_Academy.ordinal(), buildLocation.x, buildLocation.y))
+				return true;
+			else
+				return false;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
 	public Unit getLeastBusyBarracks()
 	{
 		Unit chosenRax = null;
