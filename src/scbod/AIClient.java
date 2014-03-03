@@ -121,7 +121,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 			buildingManager		= new ZergBuildingManager(bwapi, unitManager, workerManager, resourceManager);
 			productionManager	= new ZergProductionManager(bwapi, resourceManager, buildingManager);
 			militaryManager		= new ZergMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
-			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager);
+			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager, buildingManager);
 		}
 		else if ( Utility.getRace() == RaceTypes.Terran)
 		{
@@ -130,7 +130,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 			buildingManager		= new TerranBuildingManager(bwapi, unitManager, workerManager, resourceManager);
 			productionManager	= new TerranProductionManager(bwapi, resourceManager, buildingManager);
 			militaryManager		= new TerranMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
-			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager);
+			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager, buildingManager);
 		}
 		else if ( Utility.getRace() == RaceTypes.Protoss)
 		{
@@ -139,7 +139,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 			buildingManager		= new ProtossBuildingManager(bwapi, unitManager, workerManager, resourceManager);
 			productionManager	= new ProtossProductionManager(bwapi, resourceManager, buildingManager);
 			militaryManager		= new ProtossMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
-			upgradeManager		= new ZergUpgradeManager(bwapi, unitManager, resourceManager);
+			upgradeManager		= new ProtossUpgradeManager(bwapi, unitManager, resourceManager, buildingManager);
 		}
 		
 

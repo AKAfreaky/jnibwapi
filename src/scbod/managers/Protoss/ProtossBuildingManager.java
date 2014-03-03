@@ -211,4 +211,32 @@ public class ProtossBuildingManager extends BuildingManager
 		return( unitManager.getUnitCount(UnitTypes.Protoss_Forge.ordinal(), true)); 
 	}
 	
+	public int getFreeForgeCount()
+	{
+		int count = 0;
+		for( Unit unit : unitManager.getMyUnitsOfType(UnitTypes.Protoss_Forge.ordinal(), true))
+		{
+			if(!unit.isUpgrading())
+			{
+				count++;
+			}
+		}
+		
+		return count;
+	}
+	
+	public Unit getFreeForge()
+	{
+		for( Unit unit : unitManager.getMyUnitsOfType(UnitTypes.Protoss_Forge.ordinal(), true))
+		{
+			if(!unit.isUpgrading())
+			{
+				return unit;
+			}
+		}
+		
+		return null;
+	}
+
+	
 }

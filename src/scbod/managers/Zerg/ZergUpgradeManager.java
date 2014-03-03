@@ -1,5 +1,6 @@
 package scbod.managers.Zerg;
 
+import scbod.managers.BuildingManager;
 import scbod.managers.ResourceManager;
 import scbod.managers.UnitManager;
 import scbod.managers.UpgradeManager;
@@ -86,7 +87,7 @@ public class ZergUpgradeManager extends UpgradeManager
 		}
 	}
 
-	public ZergUpgradeManager(JNIBWAPI bwapi, UnitManager unitManager, ResourceManager resourceManager)
+	public ZergUpgradeManager(JNIBWAPI bwapi, UnitManager unitManager, ResourceManager resourceManager, BuildingManager buildingManager)
 	{
 		this.bwapi = bwapi;
 		this.unitManager = unitManager;
