@@ -1,7 +1,6 @@
 package scbod.managers.Protoss;
 
 import java.awt.Point;
-import java.util.ArrayList;
 
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
@@ -12,9 +11,7 @@ import scbod.managers.ResourceManager;
 
 public class ProtossProductionManager extends ProductionManager
 {
-	private ProtossBuildingManager buildingManager;
-	private ArrayList<Point> buildQueue = new ArrayList<Point>();
-	
+	private ProtossBuildingManager buildingManager;	
 	
 	public ProtossProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, BuildingManager buildingManager)
 	{
@@ -28,17 +25,6 @@ public class ProtossProductionManager extends ProductionManager
 	{
 		int incomingSupply = buildingManager.getUnfinishedPylonCount() * 8; 
 		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal() + incomingSupply);
-		
-		if(buildQueue.size() > 0)
-		{
-			for(Point point: buildQueue)
-			{
-				bwapi.train(point.x, point.y);
-			}
-			
-			buildQueue.clear();
-		}
-		
 	}
 	
 	
@@ -53,7 +39,6 @@ public class ProtossProductionManager extends ProductionManager
 				if( resourceManager.getMineralCount() >= 50 && resourceManager.getSupplyAvailable() >= 1)
 				{
 					buildQueue.add(new Point(unit.getID(), UnitTypes.Protoss_Probe.ordinal()));
-					bwapi.train(unit.getID(), UnitTypes.Protoss_Probe.ordinal());
 					return true;
 				}
 				else
@@ -83,7 +68,7 @@ public class ProtossProductionManager extends ProductionManager
 			if( resourceManager.getMineralCount() >= 100 && resourceManager.getSupplyAvailable() >= 1)
 			{
 				buildQueue.add(new Point(gateway.getID(), UnitTypes.Protoss_Zealot.ordinal()));
-				return bwapi.train(gateway.getID(), UnitTypes.Protoss_Zealot.ordinal());
+				return true;
 			}
 			else
 			{
