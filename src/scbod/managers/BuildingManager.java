@@ -48,7 +48,7 @@ public class BuildingManager extends Manager
 
 	/** Index into the buildLocations array */
 	private int						nextBuildLocation;
-	protected int						nextDefenceLocation;
+	protected int					nextDefenceLocation;
 
 	/**
 	 * Expansion locations, this is a list of expansion locations that should
@@ -508,7 +508,7 @@ public class BuildingManager extends Manager
 														expansionWorker, 
 														location.getX(), 
 														location.getY()));
-		resourceManager.reserveMinerals(300);
+		resourceManager.reserveMinerals(bwapi.getUnitType(baseTypeID).getMineralPrice());
 	}
 
 	/** Builds an expansion hatchery */
@@ -516,7 +516,7 @@ public class BuildingManager extends Manager
 	{
 		try
 		{
-			if (resourceManager.getReservedMineralCount() < 350)
+			if (resourceManager.getReservedMineralCount() < bwapi.getUnitType(baseTypeID).getMineralPrice())
 			{
 				return false;
 			}
@@ -524,23 +524,7 @@ public class BuildingManager extends Manager
 			System.out.println("Go build!");
 			System.out.println("Base location " + expansionLocation.getTx() + expansionLocation.getTy());
 			Unit worker = bwapi.getUnit(expansionWorker);
-			if (buildBuilding(baseTypeID, expansionLocation.getTx(), expansionLocation.getTy(), worker))
-			{
-				System.out.println("New hatchery added to expansions");
-				Unit hatchery = worker;
-				BaseInfo newExpansion = new BaseInfo(hatchery);
-				newExpansion.hatcheryWaitTimer = bwapi.getFrameCount();
-				baseBuildings.add(newExpansion);
-				expansionIDs.add(hatchery.getID());
-				expansionWorker = Utility.NOT_SET;
-				resourceManager.reserveMinerals(0);
-				expansionIndex++;
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return buildBuilding(baseTypeID, expansionLocation.getTx(), expansionLocation.getTy(), worker);
 		}
 		catch (Exception e)
 		{
@@ -674,7 +658,6 @@ public class BuildingManager extends Manager
 
 		for (Unit unit : bwapi.getNeutralUnits())
 		{
-			// TODO: Test this
 			if (unit.getTypeID() == UnitTypes.Resource_Mineral_Field.ordinal())
 			{
 				if (Utility.getDistance(townHall.getX(), townHall.getY(), unit.getX(), unit.getY()) < 512)
@@ -740,7 +723,7 @@ public class BuildingManager extends Manager
 		}
 		if (hall == null && bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal())
 		{
-			hall = unitManager.getMyUnitOfType(UnitTypes.Zerg_Hatchery.ordinal(), false);
+			hall = unitManager.getMyUnitOfType(UnitTypes.Zerg_Hive.ordinal(), false);
 		}
 		return hall;
 	}
@@ -757,21 +740,21 @@ public class BuildingManager extends Manager
 		double currentClosestDistance = Utility.NOT_SET;
 		for (Unit unit : bwapi.getNeutralUnits())
 		{
-			// TODO: This should only be the geyser that is next to the base
-			double distance = Utility.getDistance(townHall.getX(), townHall.getY(), unit.getX(), unit.getY());
-			if (unit.getTypeID() == UnitTypes.Resource_Vespene_Geyser.ordinal()
-					&& (distance < currentClosestDistance || currentClosestDistance == Utility.NOT_SET))
+			if (unit.getTypeID() == UnitTypes.Resource_Vespene_Geyser.ordinal())
 			{
-				if (distance > 1024)
+				double distance = Utility.getDistance(townHall.getX(), townHall.getY(), unit.getX(), unit.getY());
+				if (distance < currentClosestDistance || currentClosestDistance == Utility.NOT_SET)
 				{
-					// gesyer not likely to be part of this base
-					continue;
+					if (distance > 1024)
+					{
+						// gesyer not likely to be part of this base
+						continue;
+					}
+					closestGeyser = unit;
+					currentClosestDistance = distance;
 				}
-				closestGeyser = unit;
-				currentClosestDistance = distance;
 			}
 		}
-
 		// No geyser, give up
 		if (closestGeyser == null)
 		{
@@ -951,7 +934,6 @@ public class BuildingManager extends Manager
 		// Defence locations start from the other end, so defences get build at
 		// expansions first
 		nextDefenceLocation = buildLocations.size() - 1;
-		// TODO: Currently only tested with Azalea
 		nextExpansionLocation = 0;
 		expansionWorker = Utility.NOT_SET;
 		/* Build build map */
@@ -1058,6 +1040,19 @@ public class BuildingManager extends Manager
 			removeBuildingFromKnowldegeBase(unitID);
 		}
 
+		if(expansionWorker == unitID)
+		{
+			System.out.println("New hatchery added to expansions");
+			Unit hatchery = bwapi.getUnit(expansionWorker);
+			BaseInfo newExpansion = new BaseInfo(hatchery);
+			newExpansion.hatcheryWaitTimer = bwapi.getFrameCount();
+			baseBuildings.add(newExpansion);
+			expansionIDs.add(hatchery.getID());
+			expansionWorker = Utility.NOT_SET;
+			resourceManager.reserveMinerals(0);
+			expansionIndex++;
+		}
+		
 		if (builders.contains(unitID))
 		{
 			workerManager.removeBusyWorker(unitID);
@@ -1067,12 +1062,18 @@ public class BuildingManager extends Manager
 
 	public void idleWorker(int unitID)
 	{
-		if (builders.contains(unitID))
+		if(expansionWorker == unitID)
+		{
+			buildExpansionHatchery();
+		}
+		else if (builders.contains(unitID))
 		{
 			// Idle unit implies it's done what we asked or can't continue
 			workerManager.removeBusyWorker(unitID);
 			builders.remove(Integer.valueOf(unitID));
 		}
+		
+		
 	}
 	
 	public int getNearestTownHall(int unitID)
