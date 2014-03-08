@@ -149,7 +149,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 			System.out.println("ZergZergZergZergZerg..");
 			intelligenceManager = new ZergIntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
 			buildingManager = new ZergBuildingManager(bwapi, unitManager, workerManager, resourceManager);
-			productionManager = new ZergProductionManager(bwapi, resourceManager, buildingManager);
+			productionManager = new ZergProductionManager(bwapi, resourceManager, buildingManager, unitManager);
 			militaryManager = new ZergMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
 			upgradeManager = new ZergUpgradeManager(bwapi, unitManager, resourceManager, buildingManager);
 		}
@@ -158,7 +158,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 			System.out.println("One ornery son of a bitch");
 			intelligenceManager = new IntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
 			buildingManager = new TerranBuildingManager(bwapi, unitManager, workerManager, resourceManager);
-			productionManager = new TerranProductionManager(bwapi, resourceManager, buildingManager);
+			productionManager = new TerranProductionManager(bwapi, resourceManager, buildingManager, unitManager);
 			militaryManager = new TerranMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
 			upgradeManager = new ZergUpgradeManager(bwapi, unitManager, resourceManager, buildingManager);
 		}
@@ -167,7 +167,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 			System.out.println("I can crush you with my mind!");
 			intelligenceManager = new IntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
 			buildingManager = new ProtossBuildingManager(bwapi, unitManager, workerManager, resourceManager);
-			productionManager = new ProtossProductionManager(bwapi, resourceManager, buildingManager);
+			productionManager = new ProtossProductionManager(bwapi, resourceManager, buildingManager, unitManager);
 			militaryManager = new ProtossMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
 			upgradeManager = new ProtossUpgradeManager(bwapi, unitManager, resourceManager, buildingManager);
 		}

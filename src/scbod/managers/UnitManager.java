@@ -2,6 +2,7 @@ package scbod.managers;
 
 import java.util.ArrayList;
 
+import scbod.Utility;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;
@@ -91,6 +92,33 @@ public class UnitManager extends Manager
 			}
 		}
 		return retList;
+	}
+	
+	public Unit getLeastBusyUnitofType(int typeID)
+	{
+		Unit chosenUnit = null;
+		
+		if (bwapi.getUnitType(typeID).isBuilding())
+		{
+			ArrayList<Unit> units = getMyUnitsOfType(typeID, true);
+			int smallestQueue = Utility.NOT_SET;
+			
+			for(Unit unit: units)
+			{
+				int queue = unit.getTrainingQueueSize();
+				if(chosenUnit == null || queue < smallestQueue)
+				{
+					chosenUnit		= unit;
+					smallestQueue	= queue;
+				}
+			}
+		}
+		else
+		{
+			chosenUnit = getMyUnitOfType(typeID, true);
+		}
+		
+		return chosenUnit;
 	}
 	
 	

@@ -13,10 +13,9 @@ public class TerranProductionManager extends ProductionManager {
 	private TerranBuildingManager buildingManager;
 	private UnitManager unitManager;
 	
-	public TerranProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, BuildingManager buildingManager)
+	public TerranProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, BuildingManager buildingManager, UnitManager unitManager)
 	{
-		this.bwapi = bwapi;
-		this.resourceManager = resourceManager;
+		super(bwapi, resourceManager,unitManager);
 		this.buildingManager = (TerranBuildingManager) buildingManager;
 	}
 	

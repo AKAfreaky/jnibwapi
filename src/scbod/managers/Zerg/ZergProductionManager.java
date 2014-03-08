@@ -3,6 +3,7 @@ package scbod.managers.Zerg;
 import scbod.managers.BuildingManager;
 import scbod.managers.ProductionManager;
 import scbod.managers.ResourceManager;
+import scbod.managers.UnitManager;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.TechType.TechTypes;
@@ -13,10 +14,9 @@ public class ZergProductionManager extends ProductionManager
 {
 	private ZergBuildingManager buildingManager;
 	
-	public ZergProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, BuildingManager buildingManager)
+	public ZergProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, BuildingManager buildingManager, UnitManager unitManager)
 	{
-		this.bwapi = bwapi;
-		this.resourceManager = resourceManager;
+		super(bwapi, resourceManager,unitManager);
 		this.buildingManager = (ZergBuildingManager) buildingManager;
 	}
 
@@ -179,33 +179,10 @@ public class ZergProductionManager extends ProductionManager
 	@Override
 	public void gameUpdate()
 	{
+		super.gameUpdate();
 		// Update the resource manager with the number of overlords in
 		// production
 		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal() + (8 * getOverlordsInProduction()));
-	}
-
-	@Override
-	public boolean spawn(UnitTypes unitType)
-	{
-		switch(unitType)
-		{
-			case Zerg_Drone:
-				return spawnDrone();
-			case Zerg_Hydralisk:
-				return spawnHydralisk();
-			case Zerg_Lurker:
-				return spawnLurker();				
-			case Zerg_Mutalisk:
-				return spawnMutalisk();				
-			case Zerg_Overlord:
-				return spawnOverlord();
-			case Zerg_Zergling:
-				return spawnZerglings();
-			default:
-				System.out.println("Can't spawn that unit!");
-				break;
-		}
-		return false;
 	}
 
 }

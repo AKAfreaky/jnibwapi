@@ -8,21 +8,22 @@ import jnibwapi.types.UnitType.UnitTypes;
 import scbod.managers.BuildingManager;
 import scbod.managers.ProductionManager;
 import scbod.managers.ResourceManager;
+import scbod.managers.UnitManager;
 
 public class ProtossProductionManager extends ProductionManager
 {
 	private ProtossBuildingManager buildingManager;	
 	
-	public ProtossProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, BuildingManager buildingManager)
+	public ProtossProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, BuildingManager buildingManager, UnitManager unitManager)
 	{
-		this.bwapi = bwapi;
-		this.resourceManager = resourceManager;
+		super(bwapi, resourceManager,unitManager);
 		this.buildingManager = (ProtossBuildingManager) buildingManager;
 	}
 	
 	@Override
 	public void gameUpdate()
 	{
+		super.gameUpdate();
 		int incomingSupply = buildingManager.getUnfinishedPylonCount() * 8; 
 		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal() + incomingSupply);
 	}
@@ -81,16 +82,6 @@ public class ProtossProductionManager extends ProductionManager
 		}
 		
 		
-		return false;
-	}
-	
-	
-	
-
-	@Override
-	public boolean spawn(UnitTypes unitType)
-	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 
