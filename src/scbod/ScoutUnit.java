@@ -7,6 +7,10 @@ import jnibwapi.JNIBWAPI;
 import scbod.WorkerOrderData.WorkerOrder;
 import scbod.managers.WorkerManager;
 
+/**
+ * Controls a unit and moves it along a set route
+ * @author Alex Aiton
+ */
 public class ScoutUnit
 {
 	private int unitID;	
