@@ -10,7 +10,7 @@ import jnibwapi.types.UnitType;
  * Data structure class for holding information in buildings
  * Used when the unit data cannot be relied upon, such as for enemy buildings
  * that will not always be visible. 
- *
+ * @author Simon Davies
  */
 public class BuildingInfo {
 	

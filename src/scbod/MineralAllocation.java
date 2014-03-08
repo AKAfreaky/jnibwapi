@@ -3,6 +3,10 @@ package scbod;
 import java.awt.Point;
 import java.util.ArrayList;
 
+/**
+ * Connects mineral units to their active workers
+ * @author Simon Davies
+ */
 public class MineralAllocation {
 	
 	private int unitID;

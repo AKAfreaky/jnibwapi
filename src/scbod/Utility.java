@@ -7,12 +7,20 @@ import jnibwapi.model.Unit;
 import jnibwapi.types.RaceType.RaceTypes;
 import jnibwapi.types.UnitType.UnitTypes;
 
-/** Utility functions/methods class */
+/** 
+ * Utility functions/methods class 
+ * @author Simon Davies
+ * @author Alex Aiton
+ */
 public class Utility
 {
 
 	public final static int	NOT_SET	= -1;
-
+	private static RaceTypes RACE = RaceTypes.Unknown;
+	
+	/** 
+	 * @author Simon Davies
+	 */
 	public static double getDistance(double x1, double y1, double x2, double y2)
 	{
 		double xDistance = x2 - x1;
@@ -20,7 +28,10 @@ public class Utility
 		return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
 	}
 
-	/** Returns the closest unit in a given list to the given coordinates */
+	/** 
+	 * Returns the closest unit in a given list to the given coordinates 
+	 * @author Simon Davies
+	 */
 	public static Unit getClosestUnit(List<Unit> units, Point location)
 	{
 		Unit closestUnit = null;
@@ -40,7 +51,7 @@ public class Utility
 	/**
 	 * Returns the closest unit in a given list to the given coordinates, and of
 	 * the given type.
-	 * 
+	 * @author Simon Davies
 	 */
 	public static Unit getClosestUnitOfType(List<Unit> units, Point location, int unitType)
 	{
@@ -62,7 +73,10 @@ public class Utility
 		return closestUnit;
 	}
 
-	/** Returns the closest location in a given list to the given coordinates */
+	/** 
+	 * Returns the closest location in a given list to the given coordinates 
+	 * @author Simon Davies
+	 */
 	public static Point getClosestLocation(List<Point> points, Point target)
 	{
 		Point closestPoint = null;
@@ -79,19 +93,28 @@ public class Utility
 		return closestPoint;
 	}
 	
-	private static RaceTypes RACE = RaceTypes.Unknown;
-	
+	/** 
+	 * Sets what race we're playing so we can return the correct type ID
+	 * @author Alex Aiton
+	 */
 	public static void setRace( RaceTypes race)
 	{
 		RACE = race;
 	}
 	
+	/** 
+	 * Get the race we're playing
+	 * @author Alex Aiton
+	 */
 	public static RaceTypes getRace()
 	{
 		return RACE;
 	}
 	
-
+	/** 
+	 * Unit types which are equivalent between races
+	 * @author Alex Aiton
+	 */
 	public enum CommonUnitType
 	{
 		Worker,
@@ -99,22 +122,27 @@ public class Utility
 		Extractor
 	}
 	
-	public static int getCommonTypeID( CommonUnitType unit)
+	/** 
+	 * @author Alex Aiton
+	 * @param unitType	-	The CommonUnitType you want to get the actual UnitType for
+	 * @return typeID	-	The UnitType for the current race's common unit
+	 */
+	public static int getCommonTypeID( CommonUnitType unitType)
 	{
-		int retVal = UnitTypes.None.ordinal();
+		int typeID = UnitTypes.None.ordinal();
 		switch(RACE)
 		{
 			case Zerg:
-				switch (unit)
+				switch (unitType)
 				{
 					case Worker:
-						retVal = UnitTypes.Zerg_Drone.ordinal();
+						typeID = UnitTypes.Zerg_Drone.ordinal();
 						break;
 					case Base:
-						retVal = UnitTypes.Zerg_Hatchery.ordinal();
+						typeID = UnitTypes.Zerg_Hatchery.ordinal();
 						break;
 					case Extractor:
-						retVal = UnitTypes.Zerg_Extractor.ordinal();
+						typeID = UnitTypes.Zerg_Extractor.ordinal();
 						break;
 					default:
 						System.out.println("Unknown Common Unit Type in getCommonTypeID()!");
@@ -123,16 +151,16 @@ public class Utility
 				}
 				break;
 			case Protoss:
-				switch (unit)
+				switch (unitType)
 				{
 					case Worker:
-						retVal = UnitTypes.Protoss_Probe.ordinal();
+						typeID = UnitTypes.Protoss_Probe.ordinal();
 						break;
 					case Base:
-						retVal = UnitTypes.Protoss_Nexus.ordinal();
+						typeID = UnitTypes.Protoss_Nexus.ordinal();
 						break;
 					case Extractor:
-						retVal = UnitTypes.Protoss_Assimilator.ordinal();
+						typeID = UnitTypes.Protoss_Assimilator.ordinal();
 						break;
 					default:
 						System.out.println("Unknown Common Unit Type in getCommonTypeID()!");
@@ -141,16 +169,16 @@ public class Utility
 				}
 				break;
 			case Terran:
-				switch (unit)
+				switch (unitType)
 				{
 					case Worker:
-						retVal = UnitTypes.Terran_SCV.ordinal();
+						typeID = UnitTypes.Terran_SCV.ordinal();
 						break;
 					case Base:
-						retVal = UnitTypes.Terran_Command_Center.ordinal();
+						typeID = UnitTypes.Terran_Command_Center.ordinal();
 						break;
 					case Extractor:
-						retVal = UnitTypes.Terran_Refinery.ordinal();
+						typeID = UnitTypes.Terran_Refinery.ordinal();
 						break;
 					default:
 						System.out.println("Unknown Common Unit Type in getCommonTypeID()!");
@@ -164,7 +192,7 @@ public class Utility
 		}
 		
 		
-		return retVal;
+		return typeID;
 	}
 
 }

@@ -5,9 +5,12 @@ import java.util.ArrayList;
 
 import jnibwapi.model.Unit;
 
-/** Used to keep track of buildings that need to update the building 
+/** 
+ * Used to keep track of buildings that need to update the building 
  * location information, but only once they have been completed, such as
- * base hatcheries of creep colonies. */
+ * base hatcheries of creep colonies. 
+ * @author Simon Davies
+ */
 public class BaseInfo {
 	public Unit structure;
 	public boolean completed;

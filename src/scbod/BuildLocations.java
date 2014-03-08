@@ -3,6 +3,10 @@ package scbod;
 import java.awt.Point;
 import java.util.ArrayList;
 
+/**
+ * Overrides the super-class add() so that new Points don't overlap old points in a 3x3
+ * @author Alex Aiton
+ */
 public class BuildLocations extends ArrayList<Point>
 {
 	
@@ -11,6 +15,10 @@ public class BuildLocations extends ArrayList<Point>
 	 */
 	private static final long	serialVersionUID	= -675527657118895431L;
 
+	/**
+	 * @author Alex Ation
+	 * @see java.util.ArrayList#add(Object)
+	 */
 	public boolean add(Point newPoint)
 	{
 		int npRight	= newPoint.x + 2;
@@ -30,10 +38,8 @@ public class BuildLocations extends ArrayList<Point>
 			}
 		}
 		
-		// No points intersect so add
-		super.add(newPoint);
-		// and return
-		return true;
+		// No points intersect so add it
+		return super.add(newPoint);
 	}
 	
 }
