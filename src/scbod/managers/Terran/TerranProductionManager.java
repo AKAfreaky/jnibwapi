@@ -22,6 +22,7 @@ public class TerranProductionManager extends ProductionManager {
 	@Override
 	public void gameUpdate()
 	{
+		super.gameUpdate();
 		// TODO: update with the number of supply depots being built
 		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal());
 	}
