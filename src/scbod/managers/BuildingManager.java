@@ -29,6 +29,9 @@ import scbod.BuildLocations;
  * Building Manager * * *
  * 
  * Manager for the construction of all of the structures, and their placement.
+ * 
+ * @author Simon Davies
+ * @author Alex Aiton
  */
 public class BuildingManager extends Manager
 {
@@ -608,6 +611,7 @@ public class BuildingManager extends Manager
 	/** Do we have one extractor for each base? */
 	public boolean hasExtractorSaturation()
 	{
+		// TODO: Not all expansions have geysers
 		return unitManager.getUnitCount(extractorTypeID, false) >= (expansionIDs.size() + 1);
 	}
 
