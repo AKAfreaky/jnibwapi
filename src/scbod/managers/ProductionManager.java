@@ -1,6 +1,5 @@
 package scbod.managers;
 
-import java.awt.Point;
 import java.util.ArrayList;
 
 import jnibwapi.JNIBWAPI;
@@ -16,11 +15,28 @@ public class ProductionManager extends Manager
 		this.unitManager = unitManager;
 	}
 	
+	protected class Triple
+	{
+		public static final int TRAIN = 1;
+		public static final int ADDON = 2;
+		public static final int MORPH = 3;
+		
+		int type;
+		int producerID;
+		int productID;
+		
+		public Triple(int type, int producerID, int productID)
+		{
+			this.type = type;
+			this.producerID = producerID;
+			this.productID = productID;
+		}
+	}
+	
 	protected ResourceManager		resourceManager;
 	protected UnitManager			unitManager;
 	protected JNIBWAPI				bwapi;
-	protected ArrayList<Point>		buildQueue = new ArrayList<Point>();
-	protected ArrayList<Point>		morphQueue = new ArrayList<Point>();
+	protected ArrayList<Triple>		buildQueue = new ArrayList<Triple>();
 	
 	public boolean produceUnit(UnitType.UnitTypes unitType)
 	{		
@@ -38,18 +54,25 @@ public class ProductionManager extends Manager
 				int buildUnitID = buildUnit.getID();
 				
 				if( bwapi.canMake(buildUnitID, unitTypeID) )
-				{
-					
-					if(bwapi.getUnitType(builderTypeID).isBuilding())
+				{					
+					if(bwapi.getUnitType(unitTypeID).isAddon())
 					{
-						buildQueue.add(new Point(buildUnitID, unitTypeID));
+						buildQueue.add(new Triple(Triple.ADDON, buildUnitID, unitTypeID));
+					}
+					else if(bwapi.getUnitType(builderTypeID).isBuilding())
+					{
+						buildQueue.add(new Triple(Triple.TRAIN, buildUnitID, unitTypeID));
 					}
 					else
 					{
-						morphQueue.add(new Point(buildUnitID, unitTypeID));
+						buildQueue.add(new Triple(Triple.MORPH, buildUnitID, unitTypeID));
 					}
 					
 					return true;
+				}
+				else
+				{
+					System.out.println("The builder unit can't build a " + bwapi.getUnitType(unitTypeID).getName());
 				}
 			}
 		}
@@ -66,28 +89,29 @@ public class ProductionManager extends Manager
 	{
 		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal());
 		
-		// Bit of an abuse of the Point class here, but Java don't have a standard pair so fuck 'em
 		if(buildQueue.size() > 0)
 		{
-			for(Point point: buildQueue)
+			for(Triple triple: buildQueue)
 			{
-				bwapi.train(point.x, point.y);
+				switch(triple.type)
+				{
+					case Triple.TRAIN:
+						bwapi.train(triple.producerID, triple.productID);
+						break;
+					case Triple.ADDON:
+						bwapi.buildAddon(triple.producerID, triple.productID);
+						break;
+					case Triple.MORPH:
+						bwapi.morph(triple.producerID, triple.productID);
+						break;
+					default:
+						break;
+						
+				}
 			}
 			
 			buildQueue.clear();
-		}		
-		
-		if(morphQueue.size() > 0)
-		{
-			for(Point point: morphQueue)
-			{
-				bwapi.morph(point.x, point.y);
-			}
-			
-			buildQueue.clear();
-		}	
-		
-		
+		}
 	}
 	
 }
