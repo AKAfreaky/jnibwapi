@@ -21,8 +21,12 @@ public class ZergProductionManager extends ProductionManager
 	}
 
 	/**
-	 * Builds a drone from any larvae Returns true if successful, else false.
+	 * Builds a drone from any larvae
+	 * @author Simon Davies
+	 * @returns true if successful, otherwise false
+	 * @deprecated Recommend using the general produceUnit() method -Alex Aiton
 	 */
+	@Deprecated
 	public boolean spawnDrone()
 	{
 		for (Unit unit : bwapi.getMyUnits())
@@ -40,9 +44,12 @@ public class ZergProductionManager extends ProductionManager
 	}
 
 	/**
-	 * Builds a pair of zerglings from any larvae Returns true if successful,
-	 * else false.
+	 * Builds a pair of zerglings from any larvae
+	 * @author Simon Davies
+	 * @returns true if successful, otherwise false
+	 * @deprecated Recommend using the general produceUnit() method -Alex Aiton
 	 */
+	@Deprecated
 	public boolean spawnZerglings()
 	{
 		for (Unit unit : bwapi.getMyUnits())
@@ -61,9 +68,12 @@ public class ZergProductionManager extends ProductionManager
 	}
 
 	/**
-	 * Builds a hydralisk from any larvae Returns true if successful, else
-	 * false.
+	 * Builds a hydralisk from any larvae
+	 * @author Simon Davies
+	 * @returns true if successful, otherwise false
+	 * @deprecated Recommend using the general produceUnit() method -Alex Aiton
 	 */
+	@Deprecated
 	public boolean spawnHydralisk()
 	{
 		for (Unit unit : bwapi.getMyUnits())
@@ -82,8 +92,12 @@ public class ZergProductionManager extends ProductionManager
 	}
 
 	/**
-	 * Builds a mutalisk from any larvae Returns true if successful, else false.
+	 * Builds a mutalisk from any larvae
+	 * @author Simon Davies
+	 * @returns true if successful, otherwise false
+	 * @deprecated Recommend using the general produceUnit() method -Alex Aiton
 	 */
+	@Deprecated
 	public boolean spawnMutalisk()
 	{
 		for (Unit unit : bwapi.getMyUnits())
@@ -102,9 +116,12 @@ public class ZergProductionManager extends ProductionManager
 	}
 
 	/**
-	 * Builds an overlord from any larvae Returns true if successful, else
-	 * false.
+	 * Builds an overlord from any larvae
+	 * @author Simon Davies
+	 * @returns true if successful, otherwise false
+	 * @deprecated Recommend using the general produceUnit() method -Alex Aiton
 	 */
+	@Deprecated
 	public boolean spawnOverlord()
 	{
 		for (Unit unit : bwapi.getMyUnits())
@@ -120,7 +137,35 @@ public class ZergProductionManager extends ProductionManager
 		}
 		return false;
 	}
-
+	
+	/**
+	 * Builds an overlord from any larvae
+	 * @author Simon Davies
+	 * @returns true if successful, otherwise false
+	 * @deprecated Recommend using the general produceUnit() method -Alex Aiton
+	 */
+	@Deprecated
+	public boolean spawnLurker()
+	{
+		if (!bwapi.getSelf().hasResearched(TechTypes.Lurker_Aspect.ordinal()))
+		{
+			return false;
+		}
+		for (Unit unit : bwapi.getMyUnits())
+		{
+			if (unit.getTypeID() == UnitTypes.Zerg_Hydralisk.ordinal())
+			{
+				if (resourceManager.getMineralCount() >= 50 && resourceManager.getGasCount() >= 100
+						&& resourceManager.getSupplyAvailable() >= 1 && buildingManager.hasHydraliskDen(true))
+				{
+					bwapi.morph(unit.getID(), UnitTypes.Zerg_Lurker.ordinal());
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	/** Returns the number of overlords that are currently in production */
 	public int getOverlordsInProduction()
 	{
@@ -154,28 +199,7 @@ public class ZergProductionManager extends ProductionManager
 		}
 		return count;
 	}
-
-	public boolean spawnLurker()
-	{
-		if (!bwapi.getSelf().hasResearched(TechTypes.Lurker_Aspect.ordinal()))
-		{
-			return false;
-		}
-		for (Unit unit : bwapi.getMyUnits())
-		{
-			if (unit.getTypeID() == UnitTypes.Zerg_Hydralisk.ordinal())
-			{
-				if (resourceManager.getMineralCount() >= 50 && resourceManager.getGasCount() >= 100
-						&& resourceManager.getSupplyAvailable() >= 1 && buildingManager.hasHydraliskDen(true))
-				{
-					bwapi.morph(unit.getID(), UnitTypes.Zerg_Lurker.ordinal());
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
+	
 	@Override
 	public void gameUpdate()
 	{
