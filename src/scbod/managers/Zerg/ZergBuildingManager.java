@@ -11,7 +11,6 @@ import scbod.managers.UnitManager;
 import scbod.managers.WorkerManager;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
-import jnibwapi.types.UnitType;
 import jnibwapi.types.UnitType.UnitTypes;
 
 /**
@@ -379,30 +378,6 @@ public class ZergBuildingManager extends BuildingManager
 		}
 		super.unitDestroy(unitID);
 
-	}
-
-	@Override
-	public boolean build(UnitType.UnitTypes buildType)
-	{
-		switch (buildType)
-		{
-			case Zerg_Creep_Colony:
-				return buildCreepColony();
-			case Zerg_Evolution_Chamber:
-				return buildEvolutionChamber();
-			case Zerg_Hydralisk_Den:
-				return buildHydraliskDen();
-			case Zerg_Hatchery:
-				return buildMacroHatchery();
-			case Zerg_Spawning_Pool:
-				return buildSpawningPool();
-			case Zerg_Spire:
-				return buildSpire();
-			default:
-				System.out.println("Can't build that building!");
-				break;
-		}
-		return false;
 	}
 
 	/** Calculates all of the build locations for a given creep colony */

@@ -84,12 +84,6 @@ public class BuildingManager extends Manager
 
 	private ArrayList<Integer>		builders			= new ArrayList<Integer>();
 
-	public boolean build(UnitType.UnitTypes buildType)
-	{
-		System.out.println("Build doesn't work in the super class!");
-		return false;
-	}
-
 	public BuildingManager(JNIBWAPI bwapi, UnitManager unitManager, WorkerManager workerManager,
 			ResourceManager resourceManager)
 	{
@@ -388,6 +382,24 @@ public class BuildingManager extends Manager
 			e.printStackTrace();
 		}
 	}
+	
+	public boolean buildBuilding(UnitType.UnitTypes buildingType)
+	{
+		int buildingTypeID = buildingType.ordinal();
+		if( bwapi.canMake(buildingTypeID) )
+		{
+			Point buildLocation = getNextBuildLocation();
+			
+			if(buildBuilding(buildingTypeID, buildLocation.x, buildLocation.y))
+				return true;
+			else
+				return false;
+		}
+		
+		System.out.println("Preresiquites/Resources not avaialbe to build a " + bwapi.getUnitType(buildingTypeID).getName());
+		
+		return false;
+	}
 
 	public boolean buildBuilding(int buildingType, int tileX, int tileY)
 	{
@@ -564,7 +576,7 @@ public class BuildingManager extends Manager
 			if (info.id == unitID)
 			{
 				System.out.println("TEST: Expo destroyed");
-				for (int index : info.buildingIndexes)
+				for (Integer index : info.buildingIndexes)
 				{
 					buildLocations.remove(index);
 					System.out.println("TEST: Removing build locations");
