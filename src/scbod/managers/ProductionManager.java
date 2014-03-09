@@ -48,9 +48,16 @@ public class ProductionManager extends Manager
 					{
 						morphQueue.add(new Point(buildUnitID, unitTypeID));
 					}
+					
+					return true;
 				}
 			}
 		}
+		else
+		{
+			System.out.println("Don't have the required tech/resources to produce a " + bwapi.getUnitType(unitTypeID).getName());
+		}
+	
 		return false;
 	}
 	
