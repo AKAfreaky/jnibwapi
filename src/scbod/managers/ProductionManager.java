@@ -22,7 +22,7 @@ public class ProductionManager extends Manager
 	protected ArrayList<Point>		buildQueue = new ArrayList<Point>();
 	protected ArrayList<Point>		morphQueue = new ArrayList<Point>();
 	
-	public boolean spawn(UnitType.UnitTypes unitType)
+	public boolean produceUnit(UnitType.UnitTypes unitType)
 	{		
 		
 		//TODO: Need a special case for Protoss Archons/Dark Archons which take two of the relevent templars to spawn

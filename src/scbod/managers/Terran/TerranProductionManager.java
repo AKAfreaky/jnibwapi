@@ -116,11 +116,5 @@ public class TerranProductionManager extends ProductionManager {
 		
 		return false;
 	}
-	
-	@Override
-	public boolean spawn(UnitTypes unitType) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 }
