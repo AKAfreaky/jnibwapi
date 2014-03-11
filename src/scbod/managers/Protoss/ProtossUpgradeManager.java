@@ -10,15 +10,12 @@ import scbod.managers.UpgradeManager;
 
 public class ProtossUpgradeManager extends UpgradeManager
 {
-	JNIBWAPI bwapi;
-	UnitManager unitManager;
 	ResourceManager resourceManager;
 	ProtossBuildingManager buildingManager;
 	
 	public ProtossUpgradeManager(JNIBWAPI bwapi, UnitManager unitManager, ResourceManager resourceManager, BuildingManager buildingManager)
 	{
-		this.bwapi = bwapi;
-		this.unitManager = unitManager;
+		super(bwapi, unitManager);
 		this.resourceManager = resourceManager;
 		this.buildingManager = (ProtossBuildingManager) buildingManager;
 	}

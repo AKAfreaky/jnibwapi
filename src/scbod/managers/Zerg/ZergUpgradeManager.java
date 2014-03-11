@@ -15,8 +15,6 @@ public class ZergUpgradeManager extends UpgradeManager
 {
 
 	private ResourceManager	resourceManager;
-	private UnitManager		unitManager;
-	private JNIBWAPI		bwapi;
 
 	private boolean			hasZerglingSpeed		= false;
 	private boolean			hasHydraliskSpeed		= false;
@@ -89,8 +87,7 @@ public class ZergUpgradeManager extends UpgradeManager
 
 	public ZergUpgradeManager(JNIBWAPI bwapi, UnitManager unitManager, ResourceManager resourceManager, BuildingManager buildingManager)
 	{
-		this.bwapi = bwapi;
-		this.unitManager = unitManager;
+		super(bwapi, unitManager);
 		this.resourceManager = resourceManager;
 	}
 
