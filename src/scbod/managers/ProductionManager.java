@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType;
+import scbod.IntTriple;
 
 public class ProductionManager extends Manager
 {
@@ -15,28 +16,10 @@ public class ProductionManager extends Manager
 		this.unitManager = unitManager;
 	}
 	
-	protected class Triple
-	{
-		public static final int TRAIN = 1;
-		public static final int ADDON = 2;
-		public static final int MORPH = 3;
-		
-		int type;
-		int producerID;
-		int productID;
-		
-		public Triple(int type, int producerID, int productID)
-		{
-			this.type = type;
-			this.producerID = producerID;
-			this.productID = productID;
-		}
-	}
-	
 	protected ResourceManager		resourceManager;
 	protected UnitManager			unitManager;
 	protected JNIBWAPI				bwapi;
-	protected ArrayList<Triple>		buildQueue = new ArrayList<Triple>();
+	protected ArrayList<IntTriple>		buildQueue = new ArrayList<IntTriple>();
 	
 	public boolean produceUnit(UnitType.UnitTypes unitType)
 	{		
@@ -57,15 +40,15 @@ public class ProductionManager extends Manager
 				{					
 					if(bwapi.getUnitType(unitTypeID).isAddon())
 					{
-						buildQueue.add(new Triple(Triple.ADDON, buildUnitID, unitTypeID));
+						buildQueue.add(new IntTriple(IntTriple.ADDON, buildUnitID, unitTypeID));
 					}
 					else if(bwapi.getUnitType(builderTypeID).isBuilding())
 					{
-						buildQueue.add(new Triple(Triple.TRAIN, buildUnitID, unitTypeID));
+						buildQueue.add(new IntTriple(IntTriple.TRAIN, buildUnitID, unitTypeID));
 					}
 					else
 					{
-						buildQueue.add(new Triple(Triple.MORPH, buildUnitID, unitTypeID));
+						buildQueue.add(new IntTriple(IntTriple.MORPH, buildUnitID, unitTypeID));
 					}
 					
 					return true;
@@ -91,18 +74,18 @@ public class ProductionManager extends Manager
 		
 		if(buildQueue.size() > 0)
 		{
-			for(Triple triple: buildQueue)
+			for(IntTriple triple: buildQueue)
 			{
-				switch(triple.type)
+				switch(triple.x)
 				{
-					case Triple.TRAIN:
-						bwapi.train(triple.producerID, triple.productID);
+					case IntTriple.TRAIN:
+						bwapi.train(triple.y, triple.z);
 						break;
-					case Triple.ADDON:
-						bwapi.buildAddon(triple.producerID, triple.productID);
+					case IntTriple.ADDON:
+						bwapi.buildAddon(triple.y, triple.z);
 						break;
-					case Triple.MORPH:
-						bwapi.morph(triple.producerID, triple.productID);
+					case IntTriple.MORPH:
+						bwapi.morph(triple.y, triple.z);
 						break;
 					default:
 						break;
