@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import scbod.Utility;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
+import jnibwapi.types.TechType.TechTypes;
 import jnibwapi.types.UnitType.UnitTypes;
 
 /** Unit manager, has methods for unit selection */
@@ -106,7 +107,9 @@ public class UnitManager extends Manager
 			for(Unit unit: units)
 			{
 				int queue = unit.getTrainingQueueSize();
-				if(chosenUnit == null || queue < smallestQueue)
+				if(chosenUnit == null || (	queue <= smallestQueue	&&
+											!unit.isUpgrading()		&&
+											unit.getResearchingTechID() == TechTypes.None.ordinal()))
 				{
 					chosenUnit		= unit;
 					smallestQueue	= queue;
