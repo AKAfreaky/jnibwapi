@@ -14,6 +14,7 @@ import jnibwapi.model.BaseLocation;
 import jnibwapi.model.ChokePoint;
 import jnibwapi.model.Player;
 import jnibwapi.model.Unit;
+import jnibwapi.types.RaceType.RaceTypes;
 
 /**
  * Handles the tasks of scouting and what areas have been scouted, and where the
@@ -316,6 +317,17 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 			workerManager.removeBusyWorker(scoutDroneID);
 			scoutDroneID = Utility.NOT_SET;
 		}
+	}
+	
+	public boolean isEnemyRace( RaceTypes race)
+	{
+		for(Player player: bwapi.getEnemies())
+		{
+			if(player.getRaceID() == race.ordinal())
+				return true;
+		}
+		
+		return false;
 	}
 
 }
