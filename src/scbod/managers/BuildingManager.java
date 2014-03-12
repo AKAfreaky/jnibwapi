@@ -608,7 +608,9 @@ public class BuildingManager extends Manager
 		return unitManager.getUnitCount(extractorTypeID, false);
 	}
 
-	/** Do we have one extractor for each base? */
+	/** 
+	 * Do we have one extractor for each base? 
+	 */
 	public boolean hasExtractorSaturation()
 	{
 		// TODO: Not all expansions have geysers
@@ -1111,4 +1113,5 @@ public class BuildingManager extends Manager
 		
 		return nearestUnit;
 	}
+	
 }

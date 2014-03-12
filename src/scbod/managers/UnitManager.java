@@ -124,5 +124,19 @@ public class UnitManager extends Manager
 		return chosenUnit;
 	}
 	
+	/**
+	 * Do we have the necessary resources/buildings/techs to create the given unit type
+	 * 
+	 * Direct wrapper on the API
+	 * 
+	 * @author Alex Aiton
+	 * @param unitType - the type of the unit we want to check
+	 * @return True if that unitType can be made.
+	 */
+	public boolean canCreateUnit( UnitTypes unitType )
+	{
+		return bwapi.canMake(unitType.ordinal());
+	}
+	
 	
 }

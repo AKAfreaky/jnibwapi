@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
-import jnibwapi.types.TechType;
-import jnibwapi.types.UpgradeType;
+import jnibwapi.types.TechType.TechTypes;
+import jnibwapi.types.UpgradeType.UpgradeTypes;
 import scbod.IntTriple;
 
 
@@ -23,7 +23,7 @@ public class UpgradeManager extends Manager
 	}
 	
 	
-	public boolean upgrade( UpgradeType.UpgradeTypes upgradeType )
+	public boolean upgrade( UpgradeTypes upgradeType )
 	{
 		int upgradeTypeID = upgradeType.ordinal();
 		
@@ -42,7 +42,7 @@ public class UpgradeManager extends Manager
 		return false;
 	}
 	
-	public boolean upgrade( TechType.TechTypes techType )
+	public boolean upgrade( TechTypes techType )
 	{
 		int techTypeID = techType.ordinal();
 		
@@ -60,6 +60,30 @@ public class UpgradeManager extends Manager
 		
 		return false;
 	}
+	
+	public boolean haveResearched( TechTypes techType )
+	{
+		return bwapi.getSelf().hasResearched( techType.ordinal() );
+	}
+	
+	
+	public boolean isResearching( TechTypes techType )
+	{
+		return bwapi.getSelf().isResearching( techType.ordinal() );
+	}
+	
+	
+	public boolean isUpgrading( UpgradeTypes upgradeType )
+	{
+		return bwapi.getSelf().isUpgrading( upgradeType.ordinal() );
+	}
+	
+	
+	public int getUpgradeLevel( UpgradeTypes upgradeType )
+	{
+		return bwapi.getSelf().upgradeLevel( upgradeType.ordinal() );
+	}
+	
 	
 	public void gameUpdate()
 	{
