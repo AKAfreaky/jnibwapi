@@ -104,10 +104,10 @@ public class ScoutManager extends Manager
 	public boolean scoutStartLocations(int scoutUnitID, ScoutFinished completionHandler)
 	{
 		ArrayDeque<Point> path = new ArrayDeque<Point>();
-
+		
 		for (BaseLocation location : bwapi.getMap().getBaseLocations())
 		{
-			if (location.isStartLocation())
+			if (!location.isMineralOnly())
 			{
 				path.add(new Point(location.getX(), location.getY()));
 			}
