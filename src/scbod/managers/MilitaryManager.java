@@ -12,6 +12,7 @@ import jnibwapi.JNIBWAPI;
 import jnibwapi.model.ChokePoint;
 import jnibwapi.model.Region;
 import jnibwapi.model.Unit;
+import jnibwapi.types.UnitType;
 import jnibwapi.types.UnitType.UnitTypes;
 
 /**
@@ -91,7 +92,7 @@ public class MilitaryManager extends Manager
 		priorities.put(UnitTypes.Terran_Vulture_Spider_Mine.ordinal(), 0);
 		priorities.put(UnitTypes.Terran_Siege_Tank_Siege_Mode.ordinal(), 17);
 		priorities.put(UnitTypes.Terran_Firebat.ordinal(), 10);
-		priorities.put(UnitTypes.Terran_Medic.ordinal(), 10);
+		priorities.put(UnitTypes.Terran_Medic.ordinal(), 15); //Focus medics before marines
 		priorities.put(UnitTypes.Zerg_Larva.ordinal(), -100);
 		priorities.put(UnitTypes.Zerg_Egg.ordinal(), -100);
 		priorities.put(UnitTypes.Zerg_Zergling.ordinal(), 10);
@@ -214,11 +215,14 @@ public class MilitaryManager extends Manager
 		int forceSize = 0;
 		for (Unit unit : bwapi.getMyUnits())
 		{
+			UnitType type = bwapi.getUnitType(unit.getTypeID());
 			if (unit.getTypeID() == workerManager.getWorkerTypeID())
 			{
 				continue;
 			}
-			forceSize += bwapi.getUnitType(unit.getTypeID()).getSupplyRequired();
+			
+			
+			forceSize += type.getSupplyRequired();
 		}
 		return forceSize;
 	}
