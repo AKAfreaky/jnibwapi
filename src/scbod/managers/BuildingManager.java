@@ -436,8 +436,14 @@ public class BuildingManager extends Manager
 		}
 
 		System.out.println("Using worker number " + worker.getID() + " to build unit " + buildingType);
+		
 		workerManager.queueOrder(new WorkerOrderData(WorkerOrder.Build, worker.getID(), tileX, tileY, buildingType));
 		builders.add(worker.getID());
+		
+		if(resourceManager.getReservation(worker.getID()) == 0)
+		{
+			resourceManager.reserveMinerals(bwapi.getUnitType(buildingType).getMineralPrice(), worker.getID());
+		}
 		return true;
 	}
 
@@ -523,7 +529,7 @@ public class BuildingManager extends Manager
 														expansionWorker, 
 														location.getX(), 
 														location.getY()));
-		resourceManager.reserveMinerals(bwapi.getUnitType(baseTypeID).getMineralPrice());
+		resourceManager.reserveMinerals(bwapi.getUnitType(baseTypeID).getMineralPrice(), worker.getID());
 	}
 
 	/** Builds an expansion hatchery */
@@ -978,6 +984,20 @@ public class BuildingManager extends Manager
 		{
 			addBuildingToKnowldegeBase(unitID, unit);
 		}
+		
+		if(unit.getTypeID() == baseTypeID)
+		{
+			System.out.println("New base added to expansions");			
+			Unit expansionUnit = bwapi.getUnit(unitID);			
+			BaseInfo newExpansion = new BaseInfo(expansionUnit);
+			newExpansion.hatcheryWaitTimer = bwapi.getFrameCount();
+			baseBuildings.add(newExpansion);
+			expansionIDs.add(expansionUnit.getID());
+			expansionWorker = Utility.NOT_SET;
+			resourceManager.clearReservation(expansionWorker);
+			expansionIndex++;
+		}
+		
 	}
 
 	@Override
@@ -1067,15 +1087,11 @@ public class BuildingManager extends Manager
 			baseBuildings.add(newExpansion);
 			expansionIDs.add(hatchery.getID());
 			expansionWorker = Utility.NOT_SET;
-			resourceManager.reserveMinerals(0);
+			resourceManager.clearReservation(expansionWorker);
 			expansionIndex++;
 		}
 		
-		if (builders.contains(unitID))
-		{
-			workerManager.removeBusyWorker(unitID);
-			builders.remove(Integer.valueOf(unitID));
-		}
+		idleWorker(unitID);
 	}
 
 	public void idleWorker(int unitID)
@@ -1088,6 +1104,7 @@ public class BuildingManager extends Manager
 		{
 			// Idle unit implies it's done what we asked or can't continue
 			workerManager.removeBusyWorker(unitID);
+			resourceManager.clearReservation(unitID);			
 			builders.remove(Integer.valueOf(unitID));
 		}
 		
