@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import scbod.AIClient;
 import scbod.Utility;
 import jnibwapi.JNIBWAPI;
+import jnibwapi.model.BaseLocation;
 import jnibwapi.model.ChokePoint;
 import jnibwapi.model.Region;
 import jnibwapi.model.Unit;
@@ -53,14 +55,18 @@ public class MilitaryManager extends Manager
 		base */
 	private int							attackStartFrame;
 
+	// Tip: We run the game at ~20 Frames/s 
 	private double						attackFramesDifference	= 1250;
+	/** Number of frames that has to be passed until the AI will go into retreat mode */
+	private final int					retreatLength			= 300;
+	/** How long army will go without seeing an enemy before initiating search*/
+	protected final int	impatienceTimer = 1500;
+	
+	protected Point						attackLocation = null;
 
 	/** How many times has the retreat cycle been run
 		When this count reaches a set target, defend is initiated instead */
 	private int							startRetreatFrame;
-
-	/** Number of frames that has to be passed until the AI will go into retreat mode */
-	private final int					retreatLength			= 300;
 
 	/** Maps unit IDs onto their priority (how important the unit is to kill) */
 	private HashMap<Integer, Integer>	priorities;
@@ -73,6 +79,13 @@ public class MilitaryManager extends Manager
 	
 	/** Keys to the unitGroups for groups considered as part of the army*/
 	protected HashSet<Integer> attackUnits = new HashSet<Integer>();
+	
+	/** Last time we saw an enemy (after we started attacking)*/
+	protected int lastSeenEnemyFrame = Utility.NOT_SET;
+	
+	protected int baseCheckedCount = 0;
+	
+	
 
 	/** Set all of the priorities for the units */
 	public void setPriorities()
@@ -182,13 +195,12 @@ public class MilitaryManager extends Manager
 		priorities.put(UnitTypes.Unknown.ordinal(), 0);
 	}
 
-	/* Only update units every few frames */
-	/*
+	/** Only update units every few frames
 	 * This is required as units that are being constantly told to attack don't
 	 * actually attack.
 	 */
 	private static final int	UPDATE_TIMER	= 9;
-	// Update timer
+	/** Update timer */
 	private long				previousUpdateTime;
 
 	public MilitaryManager(JNIBWAPI bwapi, IntelligenceManager intelligenceManager, UnitManager unitManager,
@@ -224,6 +236,7 @@ public class MilitaryManager extends Manager
 			
 			forceSize += type.getSupplyRequired();
 		}
+		
 		return forceSize;
 	}
 
@@ -234,7 +247,9 @@ public class MilitaryManager extends Manager
 			return true;
 		}
 		else
+		{
 			return false;
+		}
 	}
 
 	/** Attack the enemy base if the location is known */
@@ -250,6 +265,8 @@ public class MilitaryManager extends Manager
 			{
 				state = State.ATTACKING;
 				attackStartFrame = bwapi.getFrameCount();
+				BaseLocation enemyBase = intelligenceManager.getEnemyStartLocation();
+				attackLocation = new Point(enemyBase.getX(), enemyBase.getY());
 				return true;
 			}
 		}
@@ -351,7 +368,7 @@ public class MilitaryManager extends Manager
 				ChokePoint chokePoint = it.next();
 				if (chokePoint.getFirstRegion().getID()  == startRegion.getID())
 				{
-					destination = new Point(chokePoint.getFirstSideX(), chokePoint.getFirstSideY());
+					destination = new Point(chokePoint.getCenterX(), chokePoint.getCenterY());
 				}
 				else
 				{
@@ -361,7 +378,7 @@ public class MilitaryManager extends Manager
 			else
 			{
 				System.out.println("Error setting start choke point / military destination");
-				destination = new Point(0, 0);
+				destination = new Point(startRegion.getCenterX(), startRegion.getCenterY());
 			}
 		}
 		else
@@ -512,6 +529,18 @@ public class MilitaryManager extends Manager
 
 	protected void attackUnits()
 	{
+//		for(Integer groupKey : unitGroups.keySet())
+//		{
+//			HashSet<Integer> group = unitGroups.get(groupKey);
+//			
+//			for (int unitID : group)
+//			{
+//				sendToAttackBasic(unitID);
+//			}
+//		}
+		
+		
+		
 		if (getForceSize() < 4)
 		{
 			workersNeedReset = true;
@@ -587,8 +616,13 @@ public class MilitaryManager extends Manager
 
 		Point origin = new Point((bwapi.getMap().getHeight() * 32) / 2, (bwapi.getMap().getHeight() * 32) / 2);
 
-		Point target = new Point(intelligenceManager.getEnemyStartLocation().getX(), intelligenceManager
-				.getEnemyStartLocation().getY());
+		if(attackLocation == null)
+		{
+			attackLocation = new Point(	intelligenceManager.getEnemyStartLocation().getX(), 
+										intelligenceManager.getEnemyStartLocation().getY());
+		}
+		
+		Point target = attackLocation;
 
 		double distance = Utility.getDistance(target.x, target.y, origin.x, origin.y);
 
@@ -596,7 +630,7 @@ public class MilitaryManager extends Manager
 		double unit_y = (target.y - origin.y) / distance;
 
 		destination = new Point((int) (origin.x + (unit_x * (distance * attackPercentage))),
-				(int) (origin.x + (unit_y * (distance * attackPercentage))));
+								(int) (origin.x + (unit_y * (distance * attackPercentage))));
 	}
 
 	public void gameUpdate()
@@ -620,8 +654,34 @@ public class MilitaryManager extends Manager
 		}
 		if (state == State.ATTACKING)
 		{
+			// In non-perfect info mode, getEnemyUnits will only contain visible units
+			if( bwapi.getEnemyUnits().size() > 0 )
+			{
+				lastSeenEnemyFrame = bwapi.getFrameCount();
+			}
+			else if ((bwapi.getFrameCount() - impatienceTimer) > lastSeenEnemyFrame)
+			{
+				// We've not seen an enemy for a while, so lets check other bases.
+				
+				// Get the list of possible locations
+				List<BaseLocation> bases = bwapi.getMap().getBaseLocations();
+				
+				// Calculate where to go next. We'll just cycle through these until the game ends
+				int nextBaseIter = (++baseCheckedCount) % bases.size();
+				
+				// Get the next base location				
+				BaseLocation nextBase = bwapi.getMap().getBaseLocations().get( nextBaseIter );
+				
+				// Set it as our attack location
+				attackLocation = new Point( nextBase.getX(), nextBase.getY());
+				
+				// Reset the time so we don't fire again immediately
+				lastSeenEnemyFrame = bwapi.getFrameCount();
+			}
+			
 			updateAttackLocation();
 		}
+		
 		giveUnitOrders();
 	}
 
@@ -635,12 +695,12 @@ public class MilitaryManager extends Manager
 
 	public void unitMorph(int unitID)
 	{
-		groupUnit(unitID, false);
+			groupUnit(unitID, false);
 	}
 
 	public void unitCreate(int unitID)
 	{
-		groupUnit(unitID, true);
+			groupUnit(unitID, true);
 	}
 
 	public void unitDestroy(int unitID)
@@ -653,6 +713,11 @@ public class MilitaryManager extends Manager
 		}
 	}
 	
+	/**
+	 * Is the given unit ID already grouped under a different type?
+	 * @param unitID
+	 * @return The type the unit was grouped under or Utility.NOT_SET
+	 */
 	private int isUnitInGroups( int unitID )
 	{
 		for(Integer groupKey : unitGroups.keySet())
@@ -669,29 +734,32 @@ public class MilitaryManager extends Manager
 	private void groupUnit( int unitID, boolean newUnit )
 	{
 		Unit unit = bwapi.getUnit(unitID);
-		if (unit.getPlayerID() == bwapi.getSelf().getID())
+		if (!bwapi.getUnitType(unit.getTypeID()).isBuilding())
 		{
-			if(!newUnit)
+			if (unit.getPlayerID() == bwapi.getSelf().getID())
 			{
-				removeFromGroups(unitID);
-			}			
-			
-			HashSet<Integer> unitGroup = unitGroups.get(unit.getTypeID());
-			if(unitGroup == null)
-			{
-				HashSet<Integer> newGroup = new HashSet<Integer>();
-				newGroup.add(unitID);
-				unitGroups.put(unit.getTypeID(), newGroup);
-			}
-			else
-			{
-				unitGroup.add(unitID);
-			}
-			
-			
-			if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
-			{
-				workers.add(unitID);
+				if(!newUnit)
+				{
+					removeFromGroups(unitID);
+				}			
+				
+				HashSet<Integer> unitGroup = unitGroups.get(unit.getTypeID());
+				if(unitGroup == null)
+				{
+					HashSet<Integer> newGroup = new HashSet<Integer>();
+					newGroup.add(unitID);
+					unitGroups.put(unit.getTypeID(), newGroup);
+				}
+				else
+				{
+					unitGroup.add(unitID);
+				}
+				
+				
+				if (unit.getTypeID() == UnitTypes.Zerg_Drone.ordinal())
+				{
+					workers.add(unitID);
+				}
 			}
 		}
 	}
