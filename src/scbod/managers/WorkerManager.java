@@ -439,15 +439,10 @@ public class WorkerManager extends Manager
 		if (AIClient.DEBUG)
 		{
 			bwapi.drawText(new Point(320, 32), "Drone Count : " + getWorkerCount(), true);
-			bwapi.drawText(new Point(1, 40), "Current worker orders:", true);
-			int y = 60;
 			for (Unit unit : bwapi.getMyUnits())
 			{
 				if (unit.getTypeID() == workerTypeID)
 				{
-					bwapi.drawText(new Point(0, y), "Worker " + unit.getID() + ": " + unit.getOrderID(), true);
-					y += 10;
-
 					// worker is lying and isn't busy, send them back to work!
 					if (isWorkerBusy(unit.getID()))
 					{
