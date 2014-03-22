@@ -35,6 +35,12 @@ public class MilitaryManager extends Manager
 		// Retreat
 		RETREAT,
 	}
+	
+	protected JNIBWAPI					bwapi;
+	protected IntelligenceManager		intelligenceManager;
+	protected UnitManager				unitManager;
+	protected WorkerManager				workerManager;
+	protected State						state;
 
 	/**
 	 * Tracks whether workers have been used in combat, and have to be sent back
@@ -42,51 +48,50 @@ public class MilitaryManager extends Manager
 	 */
 	private boolean						workersNeedReset;
 
+	/** Where the army is moving to/waiting */
 	protected Point						destination;
-
-	protected JNIBWAPI					bwapi;
-	protected IntelligenceManager		intelligenceManager;
-	protected UnitManager				unitManager;
-	protected WorkerManager				workerManager;
-	protected State						state;
-
-	/** How many times has the attack cycle been run
-		Increasing the attack cycle count makes the army move towards the enemy
-		base */
-	private int							attackStartFrame;
-
-	// Tip: We run the game at ~20 Frames/s 
-	private double						attackFramesDifference	= 1250;
-	/** Number of frames that has to be passed until the AI will go into retreat mode */
-	private final int					retreatLength			= 300;
-	/** How long army will go without seeing an enemy before initiating search*/
-	protected final int	impatienceTimer = 1500;
-	
+	/** The armies intended destination (destination is smoothed towards this)*/
 	protected Point						attackLocation = null;
 
-	/** How many times has the retreat cycle been run
-		When this count reaches a set target, defend is initiated instead */
+	/**
+	 * Various timer variables
+	 * Based on frame count, SC runs at ~ 20 FPS
+	 */
+	/** When we started attacking	 */
+	private int							attackStartFrame;
+	/** Controls how quickly the army heads towards a base*/
+	private double						attackFramesDifference	= 1250;
+	/** When we started retreating */
 	private int							startRetreatFrame;
-
+	/** Number of frames that the AI will retreat for before going into defence mode */
+	private final int					retreatLength			= 300;
+	/** Last time we saw an enemy (after we started attacking)*/
+	private int 						lastSeenEnemyFrame = Utility.NOT_SET;
+	/** How long army will go without seeing an enemy before initiating search*/
+	private final int					impatienceTimer			= 1500;
+	/** Only update units every few frames
+	 * This is required as units that are being constantly told to attack don't
+	 * actually attack.
+	 */
+	private static final int	UPDATE_TIMER	= 9;
+	/** Update timer */
+	private long				previousUpdateTime;
+	
 	/** Maps unit IDs onto their priority (how important the unit is to kill) */
 	private HashMap<Integer, Integer>	priorities;
 	
 	/** All of the workers */
-	private HashSet<Integer>	workers			= new HashSet<Integer>();
+	private HashSet<Integer>			workers					= new HashSet<Integer>();
 	
 	/** Groups unit IDs together (V) by their type ID (k)*/
-	protected HashMap<Integer, HashSet<Integer>> unitGroups = new HashMap<Integer, HashSet<Integer>>();
+	protected HashMap<Integer, HashSet<Integer>> unitGroups 	= new HashMap<Integer, HashSet<Integer>>();
 	
-	/** Keys to the unitGroups for groups considered as part of the army*/
-	protected HashSet<Integer> attackUnits = new HashSet<Integer>();
+	/** Unit type ID's that have their own attack/move behaviour defined in a sub-class*/
+	protected HashSet<Integer> 			specialUnits 			=  new HashSet<Integer>();
 	
-	/** Last time we saw an enemy (after we started attacking)*/
-	protected int lastSeenEnemyFrame = Utility.NOT_SET;
-	
+	/** Which base location are we heading to */
 	protected int baseCheckedCount = 0;
 	
-	
-
 	/** Set all of the priorities for the units */
 	public void setPriorities()
 	{
@@ -195,14 +200,7 @@ public class MilitaryManager extends Manager
 		priorities.put(UnitTypes.Unknown.ordinal(), 0);
 	}
 
-	/** Only update units every few frames
-	 * This is required as units that are being constantly told to attack don't
-	 * actually attack.
-	 */
-	private static final int	UPDATE_TIMER	= 9;
-	/** Update timer */
-	private long				previousUpdateTime;
-
+	
 	public MilitaryManager(JNIBWAPI bwapi, IntelligenceManager intelligenceManager, UnitManager unitManager,
 			WorkerManager workerManager)
 	{
@@ -216,7 +214,7 @@ public class MilitaryManager extends Manager
 
 
 	/**
-	 * Returns the size of the force currently possesed by the player. This is
+	 * Returns the size of the force currently possessed by the player. This is
 	 * the supply cost of the army * 2. In BWAPI, supply is doubled, so a single
 	 * zergling is one supply instead of 1/2 as it is in StarCraft itself.
 	 * 
@@ -273,7 +271,7 @@ public class MilitaryManager extends Manager
 		return false;
 	}
 
-	/** Attack the enemy base if the location is known */
+	/** Retreat!! */
 	public boolean defend()
 	{
 		attackStartFrame = 0;
@@ -425,7 +423,6 @@ public class MilitaryManager extends Manager
 				moveUnits();
 			}
 		}
-		// Do whatever it is they should do depending on state
 	}
 
 	/**
