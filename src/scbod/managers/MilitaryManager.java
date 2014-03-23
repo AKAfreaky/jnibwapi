@@ -68,7 +68,7 @@ public class MilitaryManager extends Manager
 	/** Last time we saw an enemy (after we started attacking)*/
 	private int 						lastSeenEnemyFrame = Utility.NOT_SET;
 	/** How long army will go without seeing an enemy before initiating search*/
-	private final int					impatienceTimer			= 1500;
+	private final int					impatienceTimer			= 3000;
 	/** Only update units every few frames
 	 * This is required as units that are being constantly told to attack don't
 	 * actually attack.
@@ -92,112 +92,114 @@ public class MilitaryManager extends Manager
 	/** Which base location are we heading to */
 	protected int baseCheckedCount = 0;
 	
-	/** Set all of the priorities for the units */
+	/** Set all of the priorities for the units 
+	 *	Highest Priority Unit is the unit with the smallest value of: (Distance - (Priority*20)) 
+	 */
 	public void setPriorities()
 	{
 		priorities = new HashMap<Integer, Integer>();
 		System.out.println("Set Priorities");
-		priorities.put(UnitTypes.Terran_Marine.ordinal(), 13);
-		priorities.put(UnitTypes.Terran_Ghost.ordinal(), 20);
-		priorities.put(UnitTypes.Terran_Vulture.ordinal(), 5);
-		priorities.put(UnitTypes.Terran_Goliath.ordinal(), 10);
-		priorities.put(UnitTypes.Terran_Siege_Tank_Tank_Mode.ordinal(), 25);
-		priorities.put(UnitTypes.Terran_SCV.ordinal(), 5);
-		priorities.put(UnitTypes.Terran_Wraith.ordinal(), 10);
-		priorities.put(UnitTypes.Terran_Science_Vessel.ordinal(), 10);
-		priorities.put(UnitTypes.Terran_Dropship.ordinal(), 20);
-		priorities.put(UnitTypes.Terran_Battlecruiser.ordinal(), 10);
-		priorities.put(UnitTypes.Terran_Vulture_Spider_Mine.ordinal(), 0);
-		priorities.put(UnitTypes.Terran_Siege_Tank_Siege_Mode.ordinal(), 17);
-		priorities.put(UnitTypes.Terran_Firebat.ordinal(), 10);
-		priorities.put(UnitTypes.Terran_Medic.ordinal(), 15); //Focus medics before marines
-		priorities.put(UnitTypes.Zerg_Larva.ordinal(), -100);
-		priorities.put(UnitTypes.Zerg_Egg.ordinal(), -100);
-		priorities.put(UnitTypes.Zerg_Zergling.ordinal(), 10);
-		priorities.put(UnitTypes.Zerg_Hydralisk.ordinal(), 10);
-		priorities.put(UnitTypes.Zerg_Ultralisk.ordinal(), 20);
-		priorities.put(UnitTypes.Zerg_Broodling.ordinal(), -10);
-		priorities.put(UnitTypes.Zerg_Drone.ordinal(), 5);
-		priorities.put(UnitTypes.Zerg_Overlord.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Mutalisk.ordinal(), 10);
-		priorities.put(UnitTypes.Zerg_Guardian.ordinal(), 15);
-		priorities.put(UnitTypes.Zerg_Queen.ordinal(), 15);
-		priorities.put(UnitTypes.Zerg_Defiler.ordinal(), 20);
-		priorities.put(UnitTypes.Zerg_Scourge.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Infested_Terran.ordinal(), 20);
-		priorities.put(UnitTypes.Terran_Valkyrie.ordinal(), 5);
-		priorities.put(UnitTypes.Zerg_Cocoon.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Corsair.ordinal(), 5);
-		priorities.put(UnitTypes.Protoss_Dark_Templar.ordinal(), 25);
-		priorities.put(UnitTypes.Zerg_Devourer.ordinal(), 10);
-		priorities.put(UnitTypes.Protoss_Dark_Archon.ordinal(), 15);
-		priorities.put(UnitTypes.Protoss_Probe.ordinal(), 5);
-		priorities.put(UnitTypes.Protoss_Zealot.ordinal(), 10);
-		priorities.put(UnitTypes.Protoss_Dragoon.ordinal(), 12);
-		priorities.put(UnitTypes.Protoss_High_Templar.ordinal(), 20);
-		priorities.put(UnitTypes.Protoss_Archon.ordinal(), 15);
-		priorities.put(UnitTypes.Protoss_Shuttle.ordinal(), 10);
-		priorities.put(UnitTypes.Protoss_Scout.ordinal(), 10);
-		priorities.put(UnitTypes.Protoss_Arbiter.ordinal(), 15);
-		priorities.put(UnitTypes.Protoss_Carrier.ordinal(), 15);
-		priorities.put(UnitTypes.Protoss_Interceptor.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Reaver.ordinal(), 25);
-		priorities.put(UnitTypes.Protoss_Observer.ordinal(), 5);
-		priorities.put(UnitTypes.Zerg_Lurker_Egg.ordinal(), -20);
-		priorities.put(UnitTypes.Zerg_Lurker.ordinal(), 20);
-		priorities.put(UnitTypes.Terran_Command_Center.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Comsat_Station.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Nuclear_Silo.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Supply_Depot.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Refinery.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Barracks.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Academy.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Factory.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Starport.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Control_Tower.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Science_Facility.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Covert_Ops.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Physics_Lab.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Machine_Shop.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Engineering_Bay.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Armory.ordinal(), -10);
-		priorities.put(UnitTypes.Terran_Missile_Turret.ordinal(), 5);
-		priorities.put(UnitTypes.Terran_Bunker.ordinal(), 13);
-		priorities.put(UnitTypes.Zerg_Infested_Command_Center.ordinal(), -10);
-		priorities.put(UnitTypes.Zerg_Hatchery.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Lair.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Hive.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Nydus_Canal.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Hydralisk_Den.ordinal(), -10);
-		priorities.put(UnitTypes.Zerg_Defiler_Mound.ordinal(), -5);
-		priorities.put(UnitTypes.Zerg_Greater_Spire.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Queens_Nest.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Evolution_Chamber.ordinal(), -10);
-		priorities.put(UnitTypes.Zerg_Ultralisk_Cavern.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Spire.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Spawning_Pool.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Creep_Colony.ordinal(), 0);
-		priorities.put(UnitTypes.Zerg_Spore_Colony.ordinal(), 5);
-		priorities.put(UnitTypes.Zerg_Sunken_Colony.ordinal(), 10);
-		priorities.put(UnitTypes.Zerg_Extractor.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Nexus.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Robotics_Facility.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Pylon.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Assimilator.ordinal(), -10);
-		priorities.put(UnitTypes.Protoss_Observatory.ordinal(), -10);
-		priorities.put(UnitTypes.Protoss_Gateway.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Photon_Cannon.ordinal(), 13);
-		priorities.put(UnitTypes.Protoss_Citadel_of_Adun.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Cybernetics_Core.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Templar_Archives.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Forge.ordinal(), -5);
-		priorities.put(UnitTypes.Protoss_Stargate.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Fleet_Beacon.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Arbiter_Tribunal.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Robotics_Support_Bay.ordinal(), 0);
-		priorities.put(UnitTypes.Protoss_Shield_Battery.ordinal(), -15);
-		priorities.put(UnitTypes.None.ordinal(), 0);
-		priorities.put(UnitTypes.Unknown.ordinal(), 0);
+		priorities.put(UnitTypes.Terran_Marine.ordinal(),					13);
+		priorities.put(UnitTypes.Terran_Ghost.ordinal(),					20);
+		priorities.put(UnitTypes.Terran_Vulture.ordinal(),					5);
+		priorities.put(UnitTypes.Terran_Goliath.ordinal(),					10);
+		priorities.put(UnitTypes.Terran_Siege_Tank_Tank_Mode.ordinal(),		25);
+		priorities.put(UnitTypes.Terran_SCV.ordinal(),						5);
+		priorities.put(UnitTypes.Terran_Wraith.ordinal(),					10);
+		priorities.put(UnitTypes.Terran_Science_Vessel.ordinal(),			10);
+		priorities.put(UnitTypes.Terran_Dropship.ordinal(),					20);
+		priorities.put(UnitTypes.Terran_Battlecruiser.ordinal(),			10);
+		priorities.put(UnitTypes.Terran_Vulture_Spider_Mine.ordinal(),		0);
+		priorities.put(UnitTypes.Terran_Siege_Tank_Siege_Mode.ordinal(),	17);
+		priorities.put(UnitTypes.Terran_Firebat.ordinal(),					10);
+		priorities.put(UnitTypes.Terran_Medic.ordinal(),					15); //Focus medics before marines
+		priorities.put(UnitTypes.Zerg_Larva.ordinal(),						-100);
+		priorities.put(UnitTypes.Zerg_Egg.ordinal(),						-100);
+		priorities.put(UnitTypes.Zerg_Zergling.ordinal(),					10);
+		priorities.put(UnitTypes.Zerg_Hydralisk.ordinal(),					10);
+		priorities.put(UnitTypes.Zerg_Ultralisk.ordinal(),					20);
+		priorities.put(UnitTypes.Zerg_Broodling.ordinal(),					-10);
+		priorities.put(UnitTypes.Zerg_Drone.ordinal(),						5);
+		priorities.put(UnitTypes.Zerg_Overlord.ordinal(),					0);
+		priorities.put(UnitTypes.Zerg_Mutalisk.ordinal(),					10);
+		priorities.put(UnitTypes.Zerg_Guardian.ordinal(),					15);
+		priorities.put(UnitTypes.Zerg_Queen.ordinal(),						15);
+		priorities.put(UnitTypes.Zerg_Defiler.ordinal(),					20);
+		priorities.put(UnitTypes.Zerg_Scourge.ordinal(),					0);
+		priorities.put(UnitTypes.Zerg_Infested_Terran.ordinal(),			20);
+		priorities.put(UnitTypes.Terran_Valkyrie.ordinal(),					5);
+		priorities.put(UnitTypes.Zerg_Cocoon.ordinal(),						0);
+		priorities.put(UnitTypes.Protoss_Corsair.ordinal(),					5);
+		priorities.put(UnitTypes.Protoss_Dark_Templar.ordinal(),			25);
+		priorities.put(UnitTypes.Zerg_Devourer.ordinal(),					10);
+		priorities.put(UnitTypes.Protoss_Dark_Archon.ordinal(),				15);
+		priorities.put(UnitTypes.Protoss_Probe.ordinal(),					5);
+		priorities.put(UnitTypes.Protoss_Zealot.ordinal(),					10);
+		priorities.put(UnitTypes.Protoss_Dragoon.ordinal(),					12);
+		priorities.put(UnitTypes.Protoss_High_Templar.ordinal(),			20);
+		priorities.put(UnitTypes.Protoss_Archon.ordinal(),					15);
+		priorities.put(UnitTypes.Protoss_Shuttle.ordinal(),					10);
+		priorities.put(UnitTypes.Protoss_Scout.ordinal(),					10);
+		priorities.put(UnitTypes.Protoss_Arbiter.ordinal(),					15);
+		priorities.put(UnitTypes.Protoss_Carrier.ordinal(),					15);
+		priorities.put(UnitTypes.Protoss_Interceptor.ordinal(),				0);
+		priorities.put(UnitTypes.Protoss_Reaver.ordinal(),					25);
+		priorities.put(UnitTypes.Protoss_Observer.ordinal(),				5);
+		priorities.put(UnitTypes.Zerg_Lurker_Egg.ordinal(),					-20);
+		priorities.put(UnitTypes.Zerg_Lurker.ordinal(),						20);
+		priorities.put(UnitTypes.Terran_Command_Center.ordinal(),			-10);
+		priorities.put(UnitTypes.Terran_Comsat_Station.ordinal(),			-10);
+		priorities.put(UnitTypes.Terran_Nuclear_Silo.ordinal(),				-10);
+		priorities.put(UnitTypes.Terran_Supply_Depot.ordinal(),				-10);
+		priorities.put(UnitTypes.Terran_Refinery.ordinal(),					-10);
+		priorities.put(UnitTypes.Terran_Barracks.ordinal(),					-10);
+		priorities.put(UnitTypes.Terran_Academy.ordinal(),					-10);
+		priorities.put(UnitTypes.Terran_Factory.ordinal(),					-10);
+		priorities.put(UnitTypes.Terran_Starport.ordinal(),					-10);
+		priorities.put(UnitTypes.Terran_Control_Tower.ordinal(),			-10);
+		priorities.put(UnitTypes.Terran_Science_Facility.ordinal(),			-10);
+		priorities.put(UnitTypes.Terran_Covert_Ops.ordinal(),				-10);
+		priorities.put(UnitTypes.Terran_Physics_Lab.ordinal(),				-10);
+		priorities.put(UnitTypes.Terran_Machine_Shop.ordinal(),				-10);
+		priorities.put(UnitTypes.Terran_Engineering_Bay.ordinal(),			-10);
+		priorities.put(UnitTypes.Terran_Armory.ordinal(),					-10);
+		priorities.put(UnitTypes.Terran_Missile_Turret.ordinal(),			5);
+		priorities.put(UnitTypes.Terran_Bunker.ordinal(),					13);
+		priorities.put(UnitTypes.Zerg_Infested_Command_Center.ordinal(),	-10);
+		priorities.put(UnitTypes.Zerg_Hatchery.ordinal(),					0);
+		priorities.put(UnitTypes.Zerg_Lair.ordinal(),						0);
+		priorities.put(UnitTypes.Zerg_Hive.ordinal(),						0);
+		priorities.put(UnitTypes.Zerg_Nydus_Canal.ordinal(),				0);
+		priorities.put(UnitTypes.Zerg_Hydralisk_Den.ordinal(),				-10);
+		priorities.put(UnitTypes.Zerg_Defiler_Mound.ordinal(),				-5);
+		priorities.put(UnitTypes.Zerg_Greater_Spire.ordinal(),				0);
+		priorities.put(UnitTypes.Zerg_Queens_Nest.ordinal(),				0);
+		priorities.put(UnitTypes.Zerg_Evolution_Chamber.ordinal(),			-10);
+		priorities.put(UnitTypes.Zerg_Ultralisk_Cavern.ordinal(),			0);
+		priorities.put(UnitTypes.Zerg_Spire.ordinal(),						0);
+		priorities.put(UnitTypes.Zerg_Spawning_Pool.ordinal(), 				0);
+		priorities.put(UnitTypes.Zerg_Creep_Colony.ordinal(),				0);
+		priorities.put(UnitTypes.Zerg_Spore_Colony.ordinal(), 				5);
+		priorities.put(UnitTypes.Zerg_Sunken_Colony.ordinal(), 				10);
+		priorities.put(UnitTypes.Zerg_Extractor.ordinal(), 					0);
+		priorities.put(UnitTypes.Protoss_Nexus.ordinal(), 					0);
+		priorities.put(UnitTypes.Protoss_Robotics_Facility.ordinal(), 		0);
+		priorities.put(UnitTypes.Protoss_Pylon.ordinal(), 					5); // Most Protoss buildings need pylons to function
+		priorities.put(UnitTypes.Protoss_Assimilator.ordinal(), 			-10);
+		priorities.put(UnitTypes.Protoss_Observatory.ordinal(), 			-10);
+		priorities.put(UnitTypes.Protoss_Gateway.ordinal(), 				0);
+		priorities.put(UnitTypes.Protoss_Photon_Cannon.ordinal(), 			13);
+		priorities.put(UnitTypes.Protoss_Citadel_of_Adun.ordinal(), 		0);
+		priorities.put(UnitTypes.Protoss_Cybernetics_Core.ordinal(), 		0);
+		priorities.put(UnitTypes.Protoss_Templar_Archives.ordinal(), 		0);
+		priorities.put(UnitTypes.Protoss_Forge.ordinal(), 					-5);
+		priorities.put(UnitTypes.Protoss_Stargate.ordinal(), 				0);
+		priorities.put(UnitTypes.Protoss_Fleet_Beacon.ordinal(), 			0);
+		priorities.put(UnitTypes.Protoss_Arbiter_Tribunal.ordinal(), 		0);
+		priorities.put(UnitTypes.Protoss_Robotics_Support_Bay.ordinal(), 	0);
+		priorities.put(UnitTypes.Protoss_Shield_Battery.ordinal(), 			-15);
+		priorities.put(UnitTypes.None.ordinal(), 							0);
+		priorities.put(UnitTypes.Unknown.ordinal(), 						0);
 	}
 
 	
@@ -210,6 +212,8 @@ public class MilitaryManager extends Manager
 		this.unitManager = unitManager;
 		this.workerManager = workerManager;
 		setPriorities();
+		
+		specialUnits.add(workerManager.getWorkerTypeID());
 	}
 
 
@@ -526,15 +530,18 @@ public class MilitaryManager extends Manager
 
 	protected void attackUnits()
 	{
-//		for(Integer groupKey : unitGroups.keySet())
-//		{
-//			HashSet<Integer> group = unitGroups.get(groupKey);
-//			
-//			for (int unitID : group)
-//			{
-//				sendToAttackBasic(unitID);
-//			}
-//		}
+		for(Integer groupKey : unitGroups.keySet())
+		{
+			if (!specialUnits.contains(groupKey))
+			{
+				HashSet<Integer> group = unitGroups.get(groupKey);
+				
+				for (int unitID : group)
+				{
+					sendToAttackBasic(unitID);
+				}
+			}
+		}
 		
 		
 		
@@ -576,7 +583,23 @@ public class MilitaryManager extends Manager
 	/** Moves all units to the current destination */
 	protected void moveUnits()
 	{
-		//TODO: Move some of the method back here
+		int i = 0;
+		int total = 1;
+		
+		for(Integer groupKey : unitGroups.keySet())
+		{
+			if (!specialUnits.contains(groupKey))
+			{
+				HashSet<Integer> group = unitGroups.get(groupKey);
+				
+				total += group.size();
+				for (int unitID : group)
+				{
+					moveToDestination(unitID, i, total);
+					i++;
+				}
+			}
+		}
 	}
 
 	/**

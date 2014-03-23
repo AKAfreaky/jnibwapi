@@ -29,12 +29,26 @@ public class ZergMilitaryManager extends MilitaryManager
 		unitGroups.put(UnitTypes.Zerg_Hydralisk.ordinal(), new HashSet<Integer>());
 		unitGroups.put(UnitTypes.Zerg_Mutalisk.ordinal(), new HashSet<Integer>());
 		unitGroups.put(UnitTypes.Zerg_Lurker.ordinal(), new HashSet<Integer>());
+		
+		specialUnits.add(UnitTypes.Zerg_Lurker.ordinal());
+		specialUnits.add(UnitTypes.Zerg_Overlord.ordinal());
+		
+		// Non-controllable, non-building units
+		specialUnits.add(UnitTypes.Zerg_Cocoon.ordinal());
+		specialUnits.add(UnitTypes.Zerg_Egg.ordinal());
+		specialUnits.add(UnitTypes.Zerg_Lurker_Egg.ordinal());
+		specialUnits.add(UnitTypes.Zerg_Larva.ordinal());
+		
 	}
 	
 	
 	public int getHydraliskCount()
 	{
-		return hydralisks().size();
+		HashSet<Integer> hydralisks = unitGroups.get(UnitTypes.Zerg_Hydralisk.ordinal());
+		if(hydralisks == null)
+			return 0;
+		
+		return hydralisks.size();
 	}
 	
 	@Override
@@ -42,57 +56,13 @@ public class ZergMilitaryManager extends MilitaryManager
 	{
 		super.attackUnits();
 		
-		HashSet<Integer> zerglings = zerglings();
-		HashSet<Integer> hydralisks = hydralisks();
-		HashSet<Integer> mutalisks = mutalisks();
 		HashSet<Integer> lurkers = lurkers();
 		
-		for (int unitID : zerglings)
-		{
-			sendToAttackBasic(unitID);
-		}
-		for (int unitID : hydralisks)
-		{
-			sendToAttackBasic(unitID);
-		}
-		for (int unitID : mutalisks)
-		{
-			sendToAttackBasic(unitID);
-		}
 		for (int unitID : lurkers)
 		{
-			Unit unit = bwapi.getUnit(unitID);
-			
-			if (unit  == null)
-			{
-				continue;
-			}
-			
-			Unit target = getHighestPriorityUnit((new Point(unit.getX(), unit.getY())));
-			if (!unit.isBurrowed())
-			{
-				if (Utility.getDistance(unit.getX(), unit.getY(), target.getX(), target.getY()) < 200)
-				{
-					bwapi.burrow(unitID);
-				}
-				else
-				{
-					bwapi.move(unitID, target.getX(), target.getY());
-				}
-			}
-			else
-			{
-				if (Utility.getDistance(unit.getX(), unit.getY(), target.getX(), target.getY()) > 300)
-				{
-					bwapi.unburrow(unitID);
-				}
-				else
-				{
-					bwapi.attack(unitID, target.getID());
-				}
-			}
-
+			lurkerAttack(unitID);
 		}
+		
 		if (overlord != Utility.NOT_SET)
 		{
 			Unit unit = bwapi.getUnit(overlord);
@@ -101,33 +71,54 @@ public class ZergMilitaryManager extends MilitaryManager
 		}
 	}
 	
+	/**
+	 * Moved this out of attackUnits so that method is easier to parse.
+	 * 
+	 */
+	private void lurkerAttack(int unitID)
+	{
+		Unit unit = bwapi.getUnit(unitID);
+		
+		if (unit  == null || (unit.getTypeID() != UnitTypes.Zerg_Lurker.ordinal()) )
+		{
+			return;
+		}
+		
+		Unit target = getHighestPriorityUnit((new Point(unit.getX(), unit.getY())));
+		if (!unit.isBurrowed())
+		{
+			if (Utility.getDistance(unit.getX(), unit.getY(), target.getX(), target.getY()) < 200)
+			{
+				bwapi.burrow(unitID);
+			}
+			else
+			{
+				bwapi.move(unitID, target.getX(), target.getY());
+			}
+		}
+		else
+		{
+			if (Utility.getDistance(unit.getX(), unit.getY(), target.getX(), target.getY()) > 300)
+			{
+				bwapi.unburrow(unitID);
+			}
+			else
+			{
+				bwapi.attack(unitID, target.getID());
+			}
+		}
+	}
+	
 	/** Moves all units to the current destination */
 	@Override
 	protected void moveUnits()
 	{
+		super.moveUnits();
+		
 		int i = 0;
-		HashSet<Integer> zerglings = zerglings();
-		HashSet<Integer> hydralisks = hydralisks();
-		HashSet<Integer> mutalisks = mutalisks();
 		HashSet<Integer> lurkers = lurkers();
+		int total = lurkers().size() + ((overlord != Utility.NOT_SET) ? 1 : 0);
 		
-		
-		int total = zerglings().size() + hydralisks().size() + mutalisks().size() + lurkers().size() + ((overlord != Utility.NOT_SET) ? 1 : 0);
-		for (int unitID : zerglings)
-		{
-			moveToDestination(unitID, i, total);
-			i++;
-		}
-		for (int unitID : hydralisks)
-		{
-			moveToDestination(unitID, i, total);
-			i++;
-		}
-		for (int unitID : mutalisks)
-		{
-			moveToDestination(unitID, i, total);
-			i++;
-		}
 		for (int unitID : lurkers)
 		{
 			if (bwapi.getUnit(unitID).isBurrowed())
@@ -187,37 +178,6 @@ public class ZergMilitaryManager extends MilitaryManager
 			overlord = Utility.NOT_SET;
 			overlord = unitManager.getMyUnitOfType(UnitTypes.Zerg_Overlord.ordinal()).getID();
 		}
-	}
-	
-	
-	private HashSet<Integer> zerglings()
-	{
-		HashSet<Integer> retVal = unitGroups.get(UnitTypes.Zerg_Zergling.ordinal());
-		if (retVal == null)
-		{
-			retVal = new HashSet<Integer>();
-		}
-		return retVal;
-	}
-	
-	private HashSet<Integer> hydralisks()
-	{
-		HashSet<Integer> retVal = unitGroups.get(UnitTypes.Zerg_Hydralisk.ordinal());
-		if (retVal == null)
-		{
-			retVal = new HashSet<Integer>();
-		}
-		return retVal;
-	}
-	
-	private HashSet<Integer> mutalisks()
-	{
-		HashSet<Integer> retVal = unitGroups.get(UnitTypes.Zerg_Mutalisk.ordinal());
-		if (retVal == null)
-		{
-			retVal = new HashSet<Integer>();
-		}
-		return retVal;
 	}
 	
 	private HashSet<Integer> lurkers()
