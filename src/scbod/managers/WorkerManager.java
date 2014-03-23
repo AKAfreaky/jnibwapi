@@ -50,7 +50,7 @@ public class WorkerManager extends Manager
 	private ArrayList<ExtractorInfo>		extractors			= new ArrayList<ExtractorInfo>();
 
 	/** The type ID of the worker unit for the current race */
-	private int								workerTypeID;
+	private int								workerTypeID		= Utility.NOT_SET;
 
 	/** The type ID of the base building for the current race */
 	private int								baseTypeID;
@@ -514,7 +514,11 @@ public class WorkerManager extends Manager
 	 */
 	public int getWorkerTypeID()
 	{
-		return Utility.getCommonTypeID(CommonUnitType.Worker);
+		if (workerTypeID == Utility.NOT_SET)
+		{
+			workerTypeID = Utility.getCommonTypeID(CommonUnitType.Worker);
+		}
+		return workerTypeID;
 	}
 	
 	public void queueOrder( WorkerOrderData order)

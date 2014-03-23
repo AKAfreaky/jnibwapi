@@ -223,16 +223,19 @@ public class AIClient implements BWAPIEventListener, Runnable
 
 		for (Unit unit : bwapi.getMyUnits())
 		{
-			// aa425 - I modified this slightly to check for idle scouts and
-			// idle builders
-			if (unit.isIdle())
+			if(!bwapi.getUnitType(unit.getTypeID()).isBuilding())
 			{
-				if (!scoutManager.idleScout(unit.getID()))
+				// aa425 - I modified this slightly to check for idle scouts and
+				// idle builders
+				if (unit.isIdle())
 				{
-					if (unit.getTypeID() == Utility.getCommonTypeID(CommonUnitType.Worker))
+					if (!scoutManager.idleScout(unit.getID()))
 					{
-						buildingManager.idleWorker(unit.getID());
-						workerManager.idleWorker(unit);
+						if (unit.getTypeID() == Utility.getCommonTypeID(CommonUnitType.Worker))
+						{
+							buildingManager.idleWorker(unit.getID());
+							workerManager.idleWorker(unit);
+						}
 					}
 				}
 			}
