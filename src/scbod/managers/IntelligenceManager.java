@@ -93,7 +93,7 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		scoutDroneID	= worker.getID();
 		scoutingDrone	= true;
 		
-		return scoutManager.scoutStartLocations(worker.getID(), this);
+		return scoutManager.scoutBaseLocations(worker.getID(), this);
 	}
 
 	/**
@@ -218,6 +218,11 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 			}
 			bwapi.drawText(0, 32, "Base located? " + foundEnemyBase(), true);
 			bwapi.drawText(0, 48, "isScouting? " + isScouting(), true);
+			for(Player player: bwapi.getEnemies())
+			{
+				bwapi.drawText(0, 64, "enemyRace: " + bwapi.getRaceType(player.getRaceID()).getName(), true);
+			}
+			
 		}
 	}
 
