@@ -19,6 +19,9 @@ public class ScoutUnit
 	private ScoutFinished completionHandler;
 	private WorkerManager workerManager;
 	
+	private int previousUpdateFrame = Utility.NOT_SET;
+	private final int updatePeriod = 15;
+	
 	public ScoutUnit( int scoutUnitID, ArrayDeque<Point> path, JNIBWAPI bwapi, ScoutFinished completionHandler)
 	{
 		unitID		= scoutUnitID;
@@ -45,6 +48,15 @@ public class ScoutUnit
 	
 	public boolean goToNextLocation()
 	{
+		if( (bwapi.getFrameCount() - updatePeriod) < previousUpdateFrame)
+		{
+			System.out.println("Updating too often!");
+			return true;
+		}
+		
+		previousUpdateFrame = bwapi.getFrameCount();
+		
+		
 		Point nextLocation = locations.poll();
 		
 		if (nextLocation == null)
