@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -263,31 +264,46 @@ public class BuildingManager extends Manager
 		return null;
 	}
 
-	private void calculateExpansionLocations(Unit hatchery)
+	private void calculateExpansionLocations(Unit homeBase)
 	{
-		List<BaseLocation> iBaseList = bwapi.getMap().getBaseLocations(); // immutable
-																			// base
-																			// list
-		ArrayList<BaseLocation> mBaseList = new ArrayList<BaseLocation>(iBaseList);
-		BaseLocation homeBase = getNextClosestExpansionLocation(mBaseList, hatchery);
-		mBaseList.remove(homeBase); // Remove the home base, don't care about it
-		for (int i = 0; i < 3; i++)
+		List<BaseLocation> iBaseList 			= bwapi.getMap().getBaseLocations(); // immutable base list
+		HashMap<BaseLocation, Double> baseList	= new HashMap<BaseLocation, Double>();
+		
+		// Pre-calc the A* distances to the bases, replacing island base distance with double max (easier to the the closest base)
+		for(BaseLocation base: iBaseList)
 		{
-			BaseLocation expansion = getNextClosestExpansionLocation(mBaseList, hatchery);
+			double distance = bwapi.getMap().getGroundDistance(homeBase.getTileX(), homeBase.getTileY(), base.getTx(), base.getTy());
+			
+			baseList.put(base, ((distance != -1.0) ? distance : Double.MAX_VALUE));
+		}
+		
+		// Remove the home base, not important
+		BaseLocation homeBaseLocation = getNextClosestExpansionLocation(baseList, homeBase);
+		baseList.remove(homeBaseLocation); 
+		
+		// Limit to half of the expansion (rounded up)
+		int exCount = (baseList.size() % 2 == 0) ? baseList.size() / 2 :   
+													(baseList.size() / 2) + 1;
+		
+		// Fill the location list
+		for (int i = 0; i < exCount; i++)
+		{
+			BaseLocation expansion = getNextClosestExpansionLocation(baseList, homeBase);
 			expansionLocations.add(expansion);
-			mBaseList.remove(expansion);
+			baseList.remove(expansion);
 			System.out.println("Added expansion location " + expansion.getTx() + " - " + expansion.getTy());
 		}
 
 	}
 
-	private BaseLocation getNextClosestExpansionLocation(ArrayList<BaseLocation> expansions, Unit hatchery)
+	private BaseLocation getNextClosestExpansionLocation(HashMap<BaseLocation, Double> baseList, Unit homeBase)
 	{
 		double closestDistance = Utility.NOT_SET;
 		BaseLocation closestLocation = null;
-		for (BaseLocation location : expansions)
+		
+		for (BaseLocation location : baseList.keySet())
 		{
-			double distance = Utility.getDistance(hatchery.getX(), hatchery.getY(), location.getX(), location.getY());
+			double distance = baseList.get(location);
 			if (distance < closestDistance || closestDistance == Utility.NOT_SET)
 			{
 				closestLocation = location;
