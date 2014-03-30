@@ -1039,6 +1039,7 @@ public class BuildingManager extends Manager
 		{
 			workerManager.removeBusyWorker(unitID);
 			builders.remove(Integer.valueOf(unitID));
+			resourceManager.clearReservation(unitID);
 		}
 	}
 

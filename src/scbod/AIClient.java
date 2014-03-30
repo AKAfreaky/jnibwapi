@@ -238,6 +238,11 @@ public class AIClient implements BWAPIEventListener, Runnable
 						}
 					}
 				}
+				else if (unit.isConstructing())
+				{
+					// aa425 - Clear reserved resources if we've started building
+					resourceManager.clearReservation(unit.getID());
+				}
 			}
 		}
 	}
