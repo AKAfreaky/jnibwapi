@@ -715,12 +715,12 @@ public class MilitaryManager extends Manager
 
 	public void unitMorph(int unitID)
 	{
-			groupUnit(unitID, false);
+		groupUnit(unitID, false);
 	}
 
 	public void unitCreate(int unitID)
 	{
-			groupUnit(unitID, true);
+		groupUnit(unitID, true);
 	}
 
 	public void unitDestroy(int unitID)

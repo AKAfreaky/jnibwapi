@@ -296,6 +296,7 @@ public class BuildingManager extends Manager
 
 	}
 
+	
 	private BaseLocation getNextClosestExpansionLocation(HashMap<BaseLocation, Double> baseList, Unit homeBase)
 	{
 		double closestDistance = Utility.NOT_SET;
