@@ -128,7 +128,6 @@ public class WorkerManager extends Manager
 				{
 					return false;
 				}
-				System.out.println("Queing the gas order");
 				queueOrder(new WorkerOrderData(WorkerOrder.Gather, worker.getID(), extractorUnit.getID()));
 				globalGasWorkers.add(worker.getID());
 				extractor.gasWorkers.add(worker.getID());
@@ -475,25 +474,20 @@ public class WorkerManager extends Manager
 				case Attack:
 					if (order.secondID != Utility.NOT_SET)
 					{
-						System.out.println("Telling worker: " + order.workerID + " to attack unit: " + order.secondID);
 						bwapi.attack(order.workerID, order.secondID);
 					}
 					else
 					{
-						System.out.println("Telling worker: " + order.workerID + " to attack move to: " + order.x + ", " + order.y);
 						bwapi.attack(order.workerID, order.x, order.y);
 					}
 					break;
 				case Build:
-					System.out.println("Telling worker: " + order.workerID + " to build building: " + order.secondID +" at: " + order.x + ", " + order.y);
 					bwapi.build(order.workerID, order.x, order.y, order.secondID);
 					break;
 				case Move:
-					System.out.println("Telling worker: " + order.workerID + " to move to: " + order.x + ", " + order.y);
 					bwapi.move(order.workerID, order.x, order.y);
 					break;
 				case Gather:
-					System.out.println("Telling worker: " + order.workerID + " to gather unit: " + order.secondID);
 					bwapi.gather(order.workerID, order.secondID);
 					break;
 				default:
@@ -526,7 +520,6 @@ public class WorkerManager extends Manager
 			{
 				addBusyWorker(order.workerID);
 			}
-			System.out.println("Queued an order");
 			queuedOrders.add(order);
 		}
 		else
