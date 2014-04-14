@@ -671,6 +671,7 @@ public class MilitaryManager extends Manager
 				state = State.DEFENDING;
 				startRetreatFrame = 0;
 			}
+			lastSeenEnemyFrame = bwapi.getFrameCount();
 		}
 		if (state == State.ATTACKING)
 		{
@@ -700,6 +701,10 @@ public class MilitaryManager extends Manager
 			}
 			
 			updateAttackLocation();
+		}
+		if(state == State.DEFENDING)
+		{
+			lastSeenEnemyFrame = bwapi.getFrameCount();
 		}
 		
 		giveUnitOrders();
