@@ -62,6 +62,7 @@ public class WorkerManager extends Manager
 		this.bwapi = bwapi;
 	}
 
+	@Deprecated/** @deprecated Use unitManager instead*/
 	public int getWorkerCount()
 	{
 		int count = 0;
