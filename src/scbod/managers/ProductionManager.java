@@ -45,6 +45,8 @@ public class ProductionManager extends Manager
 					else if(bwapi.getUnitType(builderTypeID).isBuilding())
 					{
 						buildQueue.add(new IntTriple(IntTriple.TRAIN, buildUnitID, unitTypeID));
+						
+						unitManager.addUnitInTraining(unitTypeID);
 					}
 					else
 					{

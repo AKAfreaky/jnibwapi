@@ -1,8 +1,10 @@
 package scbod.managers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import scbod.Utility;
+import scbod.Utility.CommonUnitType;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.TechType.TechTypes;
@@ -13,6 +15,13 @@ public class UnitManager extends Manager
 {
 
 	JNIBWAPI	bwapi;
+	
+	/** Only the first unit in a building's training queue actually exists. 
+	 *  JNIBWAPI provides no access to the actual training queue yet, 
+	 *  so to get an accurate sense of incoming units, we have to track it ourselves.
+	 *  TODO: Check if this changes in JNIBWAPI updates, or do it ourselves
+	 */
+	private HashMap<Integer, Integer>	unitsQueued = new HashMap<Integer, Integer>();
 
 	public UnitManager(JNIBWAPI bwapi)
 	{
@@ -47,17 +56,16 @@ public class UnitManager extends Manager
 	public int getUnitCount(int typeID, boolean completed)
 	{
 		int count = 0;
-		// Count number of units
+		
 		for (Unit unit : bwapi.getMyUnits())
 		{
+			// Count number of units
 			if (unit.getTypeID() == typeID && (!completed || unit.isCompleted()))
 			{
 				count++;
 			}
-		}
-		// Count number of type about to be morphed
-		for (Unit unit : bwapi.getMyUnits())
-		{
+			
+			// Count number of type about to be morphed
 			if (unit.getTypeID() == UnitTypes.Zerg_Egg.ordinal())
 			{
 				if (unit.getBuildTypeID() == typeID)
@@ -65,7 +73,13 @@ public class UnitManager extends Manager
 					count++;
 				}
 			}
-		}
+		}	
+		
+		// Count the units that are in the training queue, but not created yet
+		Integer numInTraining = unitsQueued.get(typeID);
+		count += (numInTraining == null ? 0 : numInTraining.intValue());
+		
+		
 		return count;
 	}
 
@@ -139,4 +153,34 @@ public class UnitManager extends Manager
 	}
 	
 	
+	public void addUnitInTraining(int typeID)
+	{
+		Integer currentQueued = unitsQueued.get(typeID);
+		if(currentQueued == null)
+		{
+			currentQueued = Integer.valueOf(0);
+		}
+		unitsQueued.put(typeID, ++currentQueued);
+	}
+	
+	@Override
+	public void unitCreate(int unitID)
+	{
+		Unit unit = bwapi.getUnit(unitID);
+		if (unit.getPlayerID() == bwapi.getSelf().getID())
+		{
+			int typeID = unit.getTypeID();
+			Integer curr = unitsQueued.get(typeID);
+			if (curr != null && curr > 0)
+			{
+				unitsQueued.put(typeID, --curr);
+			}
+		}
+	}
+	
+	
+	public int getWorkerCount()
+	{
+		return getUnitCount(Utility.getCommonTypeID(CommonUnitType.Worker), false);
+	}
 }
