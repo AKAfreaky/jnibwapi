@@ -11,7 +11,6 @@ import jnibwapi.types.UnitType.UnitTypes;
 public class TerranProductionManager extends ProductionManager {
 
 	private TerranBuildingManager buildingManager;
-	private UnitManager unitManager;
 	
 	public TerranProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, BuildingManager buildingManager, UnitManager unitManager)
 	{
@@ -23,8 +22,8 @@ public class TerranProductionManager extends ProductionManager {
 	public void gameUpdate()
 	{
 		super.gameUpdate();
-		// TODO: update with the number of supply depots being built
-		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal());
+		int incomingSupply = unitManager.getMyUnFinishedUnitsOfType( UnitTypes.Terran_Supply_Depot.ordinal()).size() * 8;
+		resourceManager.setPredictedSupplyTotal(resourceManager.getSupplyTotal() + incomingSupply);
 	}
 	
 	public boolean trainSCV()
