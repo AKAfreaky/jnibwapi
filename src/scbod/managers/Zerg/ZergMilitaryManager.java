@@ -12,6 +12,12 @@ import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;
 
+/**
+ * Sub-class for any Zerg specific Military behaviours
+ * 
+ * @author Alex Aiton
+ * Originally @author Simon Davies 
+ */
 public class ZergMilitaryManager extends MilitaryManager
 {
 	/** A single overlord to take with us  TODO: research why*/

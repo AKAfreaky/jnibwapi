@@ -11,6 +11,11 @@ import jnibwapi.JNIBWAPI;
 import jnibwapi.model.BaseLocation;
 import scbod.managers.WorkerManager;
 
+/**
+ * Scout manager contains all the current scouts and has methods to start scouting.
+ * 
+ * @author Alex Aiton
+ */
 public class ScoutManager extends Manager
 {
 	private ArrayList<ScoutUnit>	scouts	= new ArrayList<ScoutUnit>();

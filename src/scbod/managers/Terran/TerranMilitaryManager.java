@@ -14,6 +14,11 @@ import scbod.managers.MilitaryManager;
 import scbod.managers.UnitManager;
 import scbod.managers.WorkerManager;
 
+/**
+ * Sub-class for any Terran specific military behaviours
+ * 
+ * @author Alex Aiton
+ */
 public class TerranMilitaryManager extends MilitaryManager
 {
 	public TerranMilitaryManager(	JNIBWAPI bwapi,

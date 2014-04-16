@@ -142,8 +142,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 		workerManager = new WorkerManager(bwapi);
 		scoutManager = new ScoutManager(bwapi, workerManager);
 
-		// aa425 - This block of if statements was added by me to set up as the
-		// correct race
+		// aa425 - This block of if statements was added by me to set up as the correct race
 		if (Utility.getRace() == RaceTypes.Zerg)
 		{
 			System.out.println("ZergZergZergZergZerg..");
@@ -151,25 +150,25 @@ public class AIClient implements BWAPIEventListener, Runnable
 			buildingManager = new ZergBuildingManager(bwapi, unitManager, workerManager, resourceManager);
 			productionManager = new ZergProductionManager(bwapi, resourceManager, buildingManager, unitManager);
 			militaryManager = new ZergMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
-			upgradeManager = new ZergUpgradeManager(bwapi, unitManager, resourceManager, buildingManager);
+			upgradeManager = new ZergUpgradeManager(bwapi, unitManager, resourceManager);
 		}
 		else if (Utility.getRace() == RaceTypes.Terran)
 		{
 			System.out.println("One ornery son of a bitch");
-			intelligenceManager = new IntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
+			intelligenceManager = new TerranIntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
 			buildingManager = new TerranBuildingManager(bwapi, unitManager, workerManager, resourceManager);
 			productionManager = new TerranProductionManager(bwapi, resourceManager, buildingManager, unitManager);
 			militaryManager = new TerranMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
-			upgradeManager = new ZergUpgradeManager(bwapi, unitManager, resourceManager, buildingManager);
+			upgradeManager = new TerranUpgradeManager(bwapi, unitManager, resourceManager);
 		}
 		else if (Utility.getRace() == RaceTypes.Protoss)
 		{
 			System.out.println("I can crush you with my mind!");
-			intelligenceManager = new IntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
+			intelligenceManager = new ProtossIntelligenceManager(bwapi, unitManager, workerManager, scoutManager);
 			buildingManager = new ProtossBuildingManager(bwapi, unitManager, workerManager, resourceManager);
 			productionManager = new ProtossProductionManager(bwapi, resourceManager, buildingManager, unitManager);
 			militaryManager = new ProtossMilitaryManager(bwapi, intelligenceManager, unitManager, workerManager);
-			upgradeManager = new ProtossUpgradeManager(bwapi, unitManager, resourceManager, buildingManager);
+			upgradeManager = new ProtossUpgradeManager(bwapi, unitManager, resourceManager);
 		}
 
 		// Add managers to the call list
@@ -225,8 +224,7 @@ public class AIClient implements BWAPIEventListener, Runnable
 		{
 			if(!bwapi.getUnitType(unit.getTypeID()).isBuilding())
 			{
-				// aa425 - I modified this slightly to check for idle scouts and
-				// idle builders
+				// aa425 - I modified this slightly to check for idle scouts and idle builders
 				if (unit.isIdle())
 				{
 					if (!scoutManager.idleScout(unit.getID()))

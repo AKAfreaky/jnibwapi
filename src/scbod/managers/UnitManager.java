@@ -10,7 +10,12 @@ import jnibwapi.model.Unit;
 import jnibwapi.types.TechType.TechTypes;
 import jnibwapi.types.UnitType.UnitTypes;
 
-/** Unit manager, has methods for unit selection */
+/** 
+ * Unit manager, has methods for unit selection 
+ *
+ * @author Simon Davies
+ * @author Alex Aiton
+ */
 public class UnitManager extends Manager
 {
 
@@ -32,6 +37,7 @@ public class UnitManager extends Manager
 	 * Finds one of the players units of a given type Returns null if no unit
 	 * found.
 	 * 
+	 * @author Simon Davies
 	 * @param typeID
 	 * @return unit of given type, null if no unit found
 	 */
@@ -47,12 +53,18 @@ public class UnitManager extends Manager
 		return null;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public Unit getMyUnitOfType(int typeID)
 	{
 		return getMyUnitOfType(typeID, false);
 	}
 
-	/** Returns the number the player possesses of the given unit type */
+	/** Returns the number the player possesses of the given unit type 
+	 * @author Simon Davies
+	 * @author Alex Aiton 
+	 */
 	public int getUnitCount(int typeID, boolean completed)
 	{
 		int count = 0;
@@ -75,7 +87,7 @@ public class UnitManager extends Manager
 			}
 		}	
 		
-		// Count the units that are in the training queue, but not created yet
+		// aa425 - Count the units that are in the training queue, but not created yet
 		Integer numInTraining = unitsQueued.get(typeID);
 		count += (numInTraining == null ? 0 : numInTraining.intValue());
 		
@@ -83,6 +95,9 @@ public class UnitManager extends Manager
 		return count;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public ArrayList<Unit> getMyUnitsOfType(int typeID, boolean completed)
 	{
 		ArrayList<Unit> retList = new ArrayList<Unit>();
@@ -96,6 +111,9 @@ public class UnitManager extends Manager
 		return retList;
 	}
 	
+	/**
+	 * @author Simon Davies
+	 */
 	public ArrayList<Unit> getMyUnFinishedUnitsOfType(int typeID)
 	{
 		ArrayList<Unit> retList = new ArrayList<Unit>();
@@ -109,6 +127,9 @@ public class UnitManager extends Manager
 		return retList;
 	}
 	
+	/**
+	 * @author Alex Aiton
+	 */
 	public Unit getLeastBusyUnitofType(int typeID)
 	{
 		Unit chosenUnit = null;
@@ -138,6 +159,9 @@ public class UnitManager extends Manager
 		return chosenUnit;
 	}
 	
+	/**
+	 * @author Alex Aiton
+	 */
 	public boolean haveFreeUnitofType(int typeID)
 	{
 		return (getLeastBusyUnitofType(typeID) != null);
@@ -157,7 +181,9 @@ public class UnitManager extends Manager
 		return bwapi.canMake(unitType.ordinal());
 	}
 	
-	
+	/**
+	 * @author Alex Aiton
+	 */
 	public void addUnitInTraining(int typeID)
 	{
 		Integer currentQueued = unitsQueued.get(typeID);
@@ -169,6 +195,9 @@ public class UnitManager extends Manager
 	}
 	
 	@Override
+	/**
+	 * @author Alex Aiton
+	 */
 	public void unitCreate(int unitID)
 	{
 		Unit unit = bwapi.getUnit(unitID);
@@ -183,7 +212,9 @@ public class UnitManager extends Manager
 		}
 	}
 	
-	
+	/**
+	 * @author Alex Aiton
+	 */
 	public int getWorkerCount()
 	{
 		return getUnitCount(Utility.getCommonTypeID(CommonUnitType.Worker), false);

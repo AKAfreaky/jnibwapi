@@ -2,19 +2,19 @@ package scbod.managers.Terran;
 
 import java.awt.Point;
 
-import scbod.Utility;
 import scbod.managers.BuildingManager;
 import scbod.managers.ResourceManager;
 import scbod.managers.UnitManager;
 import scbod.managers.WorkerManager;
 import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
-import jnibwapi.types.UnitType.UnitTypes;
 
 /**
  * Terran Building Manager * * *
  * 
  * Terran specific actions related to building stuff
+ * 
+ * @author Alex Aiton
  */
 public class TerranBuildingManager extends BuildingManager 
 {
@@ -22,103 +22,7 @@ public class TerranBuildingManager extends BuildingManager
 			ResourceManager resourceManager)
 	{
 		super(bwapi, unitManager, workerManager, resourceManager);
-	}
-	
-	public boolean buildSupplyDepot()
-	{
-		if (resourceManager.getMineralCount() < 100)
-		{
-			System.out.println("Need 100 minerals to build supply depot");
-			return false;
-		}
-	
-		Point buildLocation = getNextBuildLocation();
-	
-		if (buildBuilding(UnitTypes.Terran_Supply_Depot.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-	
-	public int getDepotCount()
-	{
-		return unitManager.getUnitCount(UnitTypes.Terran_Supply_Depot.ordinal(), false);
-	}
-	
-	public int getCompletedDepotCount()
-	{
-		return unitManager.getUnitCount(UnitTypes.Terran_Supply_Depot.ordinal(), true);
-	}
-	
-	public boolean buildBarracks()
-	{
-		System.out.println("Building barracks");
-		if (resourceManager.getMineralCount() < 100)
-		{
-			System.out.println("Need 100 minerals to build barracks");
-			return false;
-		}
-		
-		Point buildLocation = getNextBuildLocation();
-		
-		if(buildBuilding(UnitTypes.Terran_Barracks.ordinal(), buildLocation.x, buildLocation.y))
-			return true;
-		else
-			return false;
-	}
-	
-	public int getBarracksCount()
-	{
-		return unitManager.getUnitCount(UnitTypes.Terran_Barracks.ordinal(), false);
-	}
-	
-	public int getCompletedBarracksCount()
-	{
-		return unitManager.getUnitCount(UnitTypes.Terran_Barracks.ordinal(), true);
-	}
-	
-	public boolean buildAcademy()
-	{
-		if(unitManager.getMyUnitOfType(UnitTypes.Terran_Barracks.ordinal(), true) != null)
-		{
-			System.out.println("Building Academy");
-			if (resourceManager.getMineralCount() < 150)
-			{
-				System.out.println("Need 150 minerals to build an Academy");
-				return false;
-			}
-			
-			Point buildLocation = getNextBuildLocation();
-			
-			if(buildBuilding(UnitTypes.Terran_Academy.ordinal(), buildLocation.x, buildLocation.y))
-				return true;
-			else
-				return false;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
-	public Unit getLeastBusyBarracks()
-	{
-		Unit chosenRax = null;
-		int smallestQueue = Utility.NOT_SET;
-		
-		for(Unit unit : unitManager.getMyUnitsOfType(UnitTypes.Terran_Barracks.ordinal(), true))
-		{
-			int queue = unit.getTrainingQueueSize();
-			if(chosenRax == null || queue < smallestQueue)
-			{
-				chosenRax		= unit;
-				smallestQueue	= queue;
-			}
-		}
-		
-		return chosenRax;
-	}
-	
+	}	
 	
 	@Override
 	public void unitCreate(int unitID)

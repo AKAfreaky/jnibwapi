@@ -8,6 +8,11 @@ import jnibwapi.JNIBWAPI;
 import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType.UnitTypes;
 
+/**
+ * Stub sub-class for any Terran specific Upgrade behaviours
+ * 
+ * @author Simon Davies
+ */
 public class ZergIntelligenceManager extends IntelligenceManager
 {
 	
@@ -45,6 +50,9 @@ public class ZergIntelligenceManager extends IntelligenceManager
 	}
 	
 	@Override
+	/**
+	 * @author Alex Aiton
+	 */
 	public void scoutRouteCompleted(int scoutID)
 	{
 		super.scoutRouteCompleted(scoutID);

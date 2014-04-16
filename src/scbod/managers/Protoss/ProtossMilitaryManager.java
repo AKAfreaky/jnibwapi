@@ -10,6 +10,11 @@ import scbod.managers.MilitaryManager;
 import scbod.managers.UnitManager;
 import scbod.managers.WorkerManager;
 
+/**
+ * Sub-class for any Protoss Specific Military behaviours
+ * 
+ * @author Alex Aiton
+ */
 public class ProtossMilitaryManager extends MilitaryManager
 {
 	public ProtossMilitaryManager(	JNIBWAPI bwapi,

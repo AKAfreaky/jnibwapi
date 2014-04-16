@@ -48,9 +48,9 @@ public class ScoutUnit
 	
 	public boolean goToNextLocation()
 	{
+		// This can get called several times in a frame, which would lead to skipping path points
 		if( (bwapi.getFrameCount() - updatePeriod) < previousUpdateFrame)
 		{
-			System.out.println("Updating too often!");
 			return true;
 		}
 		

@@ -9,6 +9,8 @@ import jnibwapi.model.Player;
 /**
  * Resource Manager Keeps track of player resources
  * 
+ * @author Simon Davies - Everything not explicitly stated
+ * @author Alex Aiton
  */
 public class ResourceManager extends Manager
 {
@@ -88,16 +90,25 @@ public class ResourceManager extends Manager
 		this.mineralCount = mineralCount;
 	}
 
+	/**
+	 * @author Alex Aiton
+	 */
 	public void reserveMinerals(int amount)
 	{
 		reserveMinerals(amount, Utility.NOT_SET);
 	}
 
+	/**
+	 * @author Alex Aiton
+	 */
 	public void reserveMinerals(Integer amount, Integer id)
 	{
 		reservedMinerals.put(id, amount);
 	}
 
+	/**
+	 * @author Alex Aiton
+	 */
 	public int getReservation(Integer id)
 	{
 		Integer value = reservedMinerals.get(id);
@@ -108,11 +119,17 @@ public class ResourceManager extends Manager
 			return 0;
 	}
 	
+	/**
+	 * @author Alex Aiton
+	 */
 	public void clearReservation(Integer id)
 	{
 		reservedMinerals.remove(id);
 	}
-
+	
+	/**
+	 * @author Alex Aiton
+	 */
 	private int calculateReservedMinerals()
 	{
 		int count = 0;

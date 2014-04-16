@@ -100,7 +100,9 @@ public class BuildingManager extends Manager
 		extractorTypeID = Utility.getCommonTypeID(CommonUnitType.Extractor);
 	}
 
-	/** Draw all of the buildings squares held in each of the arrays */
+	/** Draw all of the buildings squares held in each of the arrays 
+	 * @author Simon Davies	 
+	 */
 	private void drawBuildingSquares()
 	{
 		for (BuildingInfo info : buildingsList)
@@ -130,7 +132,9 @@ public class BuildingManager extends Manager
 	}
 	
 	/** Sets locations in the passed directions to null in the passed location list
-	 * Assumes list starts at west and goes clockwise */
+	 * Assumes list starts at west and goes clockwise 
+	 * @author Alex Aiton
+	 */
 	protected void cullLocationsForDirection(Direction dir, Point[] locations)
 	{
 		if (dir != null)
@@ -164,7 +168,10 @@ public class BuildingManager extends Manager
 	}
 	
 
-	/** Calculates all of the build locations for a given hatchery / expansion */
+	/** Calculates all of the build locations for a given hatchery / expansion 
+	 * Originally @author Simon Davies
+	 * Heavily Refactored by @author Alex Aiton
+	 */
 	protected void calculateBuildLocationsForBase(BaseInfo baseInfo)
 	{
 		Direction mineralDirection = getMineralDirection(baseInfo.structure);
@@ -215,6 +222,9 @@ public class BuildingManager extends Manager
 		nextDefenceLocation = buildLocations.size() - 1;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	protected Point getNextBuildLocation()
 	{
 		System.out.println("Getting building location");
@@ -236,6 +246,9 @@ public class BuildingManager extends Manager
 		return null;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	protected Point getNextDefenceLocation()
 	{
 		System.out.println("Getting defence building location");
@@ -263,7 +276,11 @@ public class BuildingManager extends Manager
 		}
 		return null;
 	}
-
+	
+	/**
+	 * @author Simon Davies
+	 * Heavily Modified by @author Alex Aiton
+	 */
 	private void calculateExpansionLocations(Unit homeBase)
 	{
 		List<BaseLocation> iBaseList 			= bwapi.getMap().getBaseLocations(); // immutable base list
@@ -296,7 +313,9 @@ public class BuildingManager extends Manager
 
 	}
 
-	
+	/**
+	 * @author Simon Davies
+	 */
 	private BaseLocation getNextClosestExpansionLocation(HashMap<BaseLocation, Double> baseList, Unit homeBase)
 	{
 		double closestDistance = Utility.NOT_SET;
@@ -318,6 +337,8 @@ public class BuildingManager extends Manager
 	/**
 	 * Gets the map build data for this level, which lets us know where the
 	 * buildable space is in the game world.
+	 * 
+	 * @author Simon Davies
 	 */
 	public boolean[][] getBuildableMapData()
 	{
@@ -337,6 +358,8 @@ public class BuildingManager extends Manager
 	/**
 	 * Updates the map information to tell the AI which tiles are no longer
 	 * buildable
+	 * 
+	 * @author Simon Davies
 	 */
 	private void buildingPlaced(int tileX, int tileY, int unitTypeID)
 	{
@@ -357,7 +380,10 @@ public class BuildingManager extends Manager
 			printMap();
 	}
 
-	/** Updates the map information to tell the AI which tiles are now buildable */
+	/** 
+	 * Updates the map information to tell the AI which tiles are now buildable 
+	 * @author Simon Davies	 
+	 */
 	private void buildingRemoved(int tileX, int tileY, UnitType unitType)
 	{
 		// Not a building, ignore
@@ -376,7 +402,9 @@ public class BuildingManager extends Manager
 			printMap();
 	}
 
-	/** Prints the known build map to a file, used for debugging purposes */
+	/** Prints the known build map to a file, used for debugging purposes 
+	 *  @author Simon Davies
+	 */
 	private void printMap()
 	{
 		// TODO: Probably don't need this, but keep it in here for now.
@@ -403,6 +431,9 @@ public class BuildingManager extends Manager
 		}
 	}
 	
+	/**
+	 * @author Simon Davies
+	 */
 	public boolean buildBuilding(UnitType.UnitTypes buildingType)
 	{
 		int buildingTypeID = buildingType.ordinal();
@@ -421,6 +452,9 @@ public class BuildingManager extends Manager
 		return false;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public boolean buildBuilding(int buildingType, int tileX, int tileY)
 	{
 		Unit worker = workerManager.getNearestFreeWorker(tileX, tileY);
@@ -432,6 +466,9 @@ public class BuildingManager extends Manager
 	 * buildable, then the location is moved slightly based on a random value,
 	 * until a buildable place can be found. This should not be relied upon, and
 	 * higher level methods should instead predetermine where to build.
+	 * 
+	 * @author Simon Davies
+	 * @author Alex Aiton
 	 */
 	public boolean buildBuilding(int buildingType, int tileX, int tileY, Unit worker)
 	{
@@ -454,6 +491,7 @@ public class BuildingManager extends Manager
 
 		System.out.println("Using worker number " + worker.getID() + " to build unit " + buildingType);
 		
+		//aa425 - Added a worker queue because of problems with the API
 		workerManager.queueOrder(new WorkerOrderData(WorkerOrder.Build, worker.getID(), tileX, tileY, buildingType));
 		builders.add(worker.getID());
 		
@@ -464,7 +502,9 @@ public class BuildingManager extends Manager
 		return true;
 	}
 
-	/** Determines whether a location is a valid build position or not */
+	/** Determines whether a location is a valid build position or not 
+	 * 	@author Simon Davies 
+	 */
 	private boolean validBuildPosition(int buildingType, int tileX, int tileY)
 	{
 		UnitType building = bwapi.getUnitType(buildingType);
@@ -481,7 +521,9 @@ public class BuildingManager extends Manager
 		return true;
 	}
 
-	/** Builds a gas extraction building on the nearest free geyser */
+	/** Builds a gas extraction building on the nearest free geyser 
+	 * 	@author Simon Davies
+	 */
 	public boolean buildExtractor()
 	{
 		/* First find the closest drone to the geyser */
@@ -529,6 +571,7 @@ public class BuildingManager extends Manager
 	/**
 	 * Send worker to expansion location - Also reserves the minerals so you can
 	 * actually build it.
+	 * @author Simon Davies
 	 */
 	public void sendWorkerToExpansionLocation()
 	{
@@ -549,7 +592,10 @@ public class BuildingManager extends Manager
 		resourceManager.reserveMinerals(bwapi.getUnitType(baseTypeID).getMineralPrice(), worker.getID());
 	}
 
-	/** Builds an expansion hatchery */
+	/** Builds an expansion hatchery 
+	 * 
+	 * 	@author Simon Davies
+	 */
 	public boolean buildExpansionHatchery()
 	{
 		try
@@ -571,6 +617,9 @@ public class BuildingManager extends Manager
 		return false;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public boolean expansionDroneReady()
 	{
 		if (bwapi.getUnit(expansionWorker) == null)
@@ -591,9 +640,10 @@ public class BuildingManager extends Manager
 		}
 	}
 
-	/*
+	/**
 	 * Called when a unit is destroyed. If the unit is a players hatchery or
 	 * colony, then all of the associated build locations should be removed
+	 * @author Simon Davies
 	 */
 	private void checkForBuildLocationRemoval(int unitID)
 	{
@@ -619,6 +669,9 @@ public class BuildingManager extends Manager
 		}
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	private BaseLocation getNextExpansionLocation()
 	{
 		BaseLocation location = expansionLocations.get(nextExpansionLocation);
@@ -626,6 +679,9 @@ public class BuildingManager extends Manager
 		return location;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public int getExtractorCount()
 	{
 		return unitManager.getUnitCount(extractorTypeID, false);
@@ -633,6 +689,7 @@ public class BuildingManager extends Manager
 
 	/** 
 	 * Do we have one extractor for each base? 
+	 * @author Simon Davies
 	 */
 	public boolean hasExtractorSaturation()
 	{
@@ -640,13 +697,17 @@ public class BuildingManager extends Manager
 		return unitManager.getUnitCount(extractorTypeID, false) >= (expansionIDs.size() + 1);
 	}
 
-	/** have all the extractors been completed? */
+	/** have all the extractors been completed? 
+	 *  @author Simon Davies
+	 */
 	public boolean allExtractorsCompleted()
 	{
 		return (unitManager.getUnitCount(extractorTypeID, false)) == (unitManager.getUnitCount(extractorTypeID, true));
 	}
 
-	/** Determines the direction of a hatchery to another building */
+	/** Determines the direction of a hatchery to another building 
+	 *  @author Simon Davies
+	 */
 	public Direction getHatcheryDirection(Unit colony, Unit hatchery)
 	{
 		// No hatchery found, give up?
@@ -683,7 +744,9 @@ public class BuildingManager extends Manager
 		}
 	}
 
-	/** Determines the direction of the minerals */
+	/** Determines the direction of the minerals 
+	 *  @author Simon Davies
+	 */
 	public Direction getMineralDirection(Unit townHall)
 	{
 		// No hatchery found, give up?
@@ -750,6 +813,7 @@ public class BuildingManager extends Manager
 	 * Returns a town hall. This is either a Hatchery, Lair, or Hive. If there
 	 * is a Hive, will return that, then Lair, then Hatchery.
 	 * 
+	 * @author Simon Davies
 	 * @return Returns a Hive unit, Lair unit, or Hatchery unit.
 	 */
 	protected Unit getTownHall()
@@ -769,7 +833,9 @@ public class BuildingManager extends Manager
 		return hall;
 	}
 
-	/** Determines the direction of the geyser */
+	/** Determines the direction of the geyser 
+	 *	@author Simon Davies
+	 */
 	public Direction getGeyserDirection(Unit townHall)
 	{
 		// No hatchery found, give up?
@@ -837,10 +903,10 @@ public class BuildingManager extends Manager
 	/**
 	 * Returns whether the AI has built an extractor yet.
 	 * 
+	 * @author Simon Davies
 	 * @param completed
 	 *            If true, will return false if the building is still in
 	 *            progress
-	 * @return
 	 */
 	public boolean hasExtractor(boolean completed)
 	{
@@ -859,6 +925,8 @@ public class BuildingManager extends Manager
 	/**
 	 * Returns the number of hatcheries, lairs or hives currently owned by the
 	 * player
+	 * 
+	 * @author Simon Davies
 	 */
 	public int getHatcheryCount()
 	{
@@ -869,7 +937,7 @@ public class BuildingManager extends Manager
 			{
 				count++;
 			}
-			// Darn zerg and their upgrading town halls
+			// aa425 - Darn zerg and their upgrading town halls
 			else if (bwapi.getSelf().getRaceID() == RaceTypes.Zerg.ordinal()
 					&& (unit.getTypeID() == UnitTypes.Zerg_Lair.ordinal() || unit.getTypeID() == UnitTypes.Zerg_Hive
 							.ordinal()))
@@ -880,14 +948,18 @@ public class BuildingManager extends Manager
 		return count;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public int getExpansionCount()
 	{
 		return expansionIDs.size();
 	}
 
-	private int	count	= 0;
-
 	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void gameUpdate()
 	{
 		if (AIClient.DEBUG)
@@ -904,6 +976,9 @@ public class BuildingManager extends Manager
 		checkCompletedHatcheries();
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	private void checkCompletedHatcheries()
 	{
 		for (BaseInfo base : baseBuildings)
@@ -949,6 +1024,10 @@ public class BuildingManager extends Manager
 		}
 	}
 
+	/**
+	 * 
+	 * @author Simon Davies
+	 */
 	private boolean hatcheryInfoExists(int unitID)
 	{
 		for (BaseInfo info : baseBuildings)
@@ -962,6 +1041,9 @@ public class BuildingManager extends Manager
 	}
 
 	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void gameStarted()
 	{
 		// Reset variables
@@ -994,6 +1076,9 @@ public class BuildingManager extends Manager
 	}
 
 	@Override
+	/**
+	 * @author Alex Aiton
+	 */
 	public void unitCreate(int unitID)
 	{
 		Unit unit = bwapi.getUnit(unitID);
@@ -1018,6 +1103,9 @@ public class BuildingManager extends Manager
 	}
 
 	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void unitDestroy(int unitID)
 	{
 		removeBuildingFromKnowldegeBase(unitID);
@@ -1044,6 +1132,9 @@ public class BuildingManager extends Manager
 	}
 
 	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void unitDiscover(int unitID)
 	{
 		Unit unit = bwapi.getUnit(unitID);
@@ -1053,12 +1144,18 @@ public class BuildingManager extends Manager
 		}
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	private void addBuildingToKnowldegeBase(int unitID, Unit unit)
 	{
 		buildingPlaced(unit.getTileX(), unit.getTileY(), unit.getTypeID());
 		buildingsList.add(new BuildingInfo(unit, bwapi));
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	private void removeBuildingFromKnowldegeBase(int unitID)
 	{
 		// Work around
@@ -1082,6 +1179,9 @@ public class BuildingManager extends Manager
 	}
 
 	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void unitMorph(int unitID)
 	{
 		Unit unit = bwapi.getUnit(unitID);
@@ -1112,13 +1212,17 @@ public class BuildingManager extends Manager
 		idleWorker(unitID);
 	}
 
+	/**
+	 * @author Simon Davies
+	 * @author Alex Aiton
+	 */
 	public void idleWorker(int unitID)
 	{
 		if(expansionWorker == unitID)
 		{
 			buildExpansionHatchery();
 		}
-		else if (builders.contains(unitID))
+		else if (builders.contains(unitID)) //aa425 - added by me
 		{
 			// Idle unit implies it's done what we asked or can't continue
 			workerManager.removeBusyWorker(unitID);
@@ -1129,6 +1233,9 @@ public class BuildingManager extends Manager
 		
 	}
 	
+	/**
+	 * @author Simon Davies
+	 */
 	public int getNearestTownHall(int unitID)
 	{
 		Point unitLoc = new Point(bwapi.getUnit(unitID).getX(), bwapi.getUnit(unitID).getY());

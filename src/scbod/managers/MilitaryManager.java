@@ -18,8 +18,11 @@ import jnibwapi.types.UnitType;
 import jnibwapi.types.UnitType.UnitTypes;
 
 /**
- * Zergling manager handles all of the zerglings owned by the player, and deals
+ * Military manager handles all of the units owned by the player, and deals
  * with sending them to attack, retreat and defending of the base.
+ * 
+ * @author Simon Davies
+ * @author Alex Aiton
  */
 public class MilitaryManager extends Manager
 {

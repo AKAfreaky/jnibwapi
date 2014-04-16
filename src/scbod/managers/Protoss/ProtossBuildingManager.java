@@ -14,9 +14,11 @@ import scbod.managers.UnitManager;
 import scbod.managers.WorkerManager;
 
 /**
- * Protoss Building Manager * * *
+ * Protoss Building Manager
  * 
  * Protoss specific actions related to building stuff
+ * 
+ * @author Alex Aiton
  */
 public class ProtossBuildingManager extends BuildingManager
 {
@@ -124,40 +126,10 @@ public class ProtossBuildingManager extends BuildingManager
 		return chosenRax;
 	}
 	
-	/** The number of pylons */
-	public int getPylonCount()
-	{
-		return (unitManager.getMyUnitsOfType(UnitTypes.Protoss_Pylon.ordinal(), false).size());
-	}
-	
 	/** The number of pylons still warping in */
 	public int getUnfinishedPylonCount()
 	{
 		return( unitManager.getMyUnFinishedUnitsOfType(UnitTypes.Protoss_Pylon.ordinal()).size());
-	}
-	
-	/** The number of summoned gateways */
-	public int getGatewayCount()
-	{
-		return (unitManager.getMyUnitsOfType(UnitTypes.Protoss_Gateway.ordinal(), false).size());
-	}
-	
-	/** The number of gateways ready to build */
-	public int getCompletedGatewayCount()
-	{
-		return( unitManager.getUnitCount(UnitTypes.Protoss_Gateway.ordinal(), true));
-	}
-	
-	/** How many Forges have been summoned */
-	public int getForgeCount()
-	{
-		return( unitManager.getUnitCount(UnitTypes.Protoss_Forge.ordinal(), false));
-	}
-	
-	/** How many Forges are ready to research */
-	public int getCompletedForgeCount()
-	{
-		return( unitManager.getUnitCount(UnitTypes.Protoss_Forge.ordinal(), true)); 
 	}
 	
 	public int getFreeForgeCount()

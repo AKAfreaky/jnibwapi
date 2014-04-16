@@ -22,6 +22,8 @@ import scbod.WorkerOrderData.WorkerOrder;
  * addBusyWorker method, and then should be released with the removeBusyWorker
  * method.
  * 
+ * @author Simon Davies
+ * @author Alex Aiton
  */
 public class WorkerManager extends Manager
 {
@@ -92,7 +94,9 @@ public class WorkerManager extends Manager
 		return count;
 	}
 
-	/** returns the number of drones currently collecting gas */
+	/** returns the number of drones currently collecting gas 
+	 *	@author Simon Davies 
+	 */
 	public int getGasWorkerCount()
 	{
 		return globalGasWorkers.size();
@@ -100,6 +104,7 @@ public class WorkerManager extends Manager
 
 	/**
 	 * Sends 3 workers to each build geyser.
+	 * @author Simon Davies
 	 */
 	public boolean startCollectingGas()
 	{
@@ -137,6 +142,9 @@ public class WorkerManager extends Manager
 		return true;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public Unit getNearestFreeWorker(int tileX, int tileY)
 	{
 		Unit worker = null;
@@ -160,6 +168,7 @@ public class WorkerManager extends Manager
 
 	/**
 	 * Is the given worker ID busy on something and should not be disturbed?
+	 * @author Simon Davies
 	 */
 	public boolean isWorkerBusy(int unitID)
 	{
@@ -175,6 +184,7 @@ public class WorkerManager extends Manager
 
 	/**
 	 * Is the given worker ID a gas worker?
+	 * @author Simon Davies
 	 */
 	public boolean isGasWorker(int unitID)
 	{
@@ -188,19 +198,26 @@ public class WorkerManager extends Manager
 		}
 	}
 
-	/** Add the given ID to the list of busy workers */
+	/** Add the given ID to the list of busy workers 
+	 *	@author Simon Davies 
+	 */
 	public void addBusyWorker(int unitID)
 	{
 		busyWorkers.add(unitID);
 	}
 
-	/** Remove the given ID from the list of busy workers */
+	/** Remove the given ID from the list of busy workers 
+	 *  @author Simon Davies
+	 */
 	public void removeBusyWorker(int unitID)
 	{
 		busyWorkers.remove(Integer.valueOf(unitID));
 	}
 
 	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void gameStarted()
 	{
 		mineralFields.clear();
@@ -225,6 +242,9 @@ public class WorkerManager extends Manager
 		}
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public void newBaseBuilding(BaseInfo newBase)
 	{
 		baseBuildings.add(newBase);
@@ -258,6 +278,7 @@ public class WorkerManager extends Manager
 	 * Checks whether the given unitID is a known hatchery, and if so, remove
 	 * the mineral patches nearby from the mineral allocation mechanism.
 	 * 
+	 * @author Simon Davies
 	 * @param unitID
 	 */
 	private void killedBaseBuilding(int unitID)
@@ -282,8 +303,11 @@ public class WorkerManager extends Manager
 			}
 		}
 	}
-
-	// Remove a mineral field
+ 
+	/**
+	 * Remove a mineral field
+	 * @author Simon Davies
+	 */
 	private void removeMineral(int id)
 	{
 		for (MineralAllocation mineral : mineralFields)
@@ -296,6 +320,9 @@ public class WorkerManager extends Manager
 		}
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public void recalculateMiningWorkers()
 	{
 		System.out.println("Recalculating mining workers");
@@ -318,7 +345,10 @@ public class WorkerManager extends Manager
 		}
 	}
 
-	/** Sends a drone to go mine at the best possible mineral patch */
+	/** 
+	 * Sends a drone to go mine at the best possible mineral patch 
+	 * @author Simon Davies 
+	 */
 	private void calculateMining(int unitID)
 	{
 		Unit worker = bwapi.getUnit(unitID);
@@ -357,6 +387,9 @@ public class WorkerManager extends Manager
 		bestMineral.assignDrone(unitID);
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	private boolean hasMineralID(int unitID)
 	{
 		for (MineralAllocation mineral : mineralFields)
@@ -368,6 +401,9 @@ public class WorkerManager extends Manager
 	}
 
 	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void unitDestroy(int unitID)
 	{
 		// If it is a mineral, remove it
@@ -403,6 +439,9 @@ public class WorkerManager extends Manager
 	}
 
 	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void unitMorph(int unitID)
 	{
 		Unit unit = bwapi.getUnit(unitID);
@@ -423,7 +462,10 @@ public class WorkerManager extends Manager
 		}
 	}
 
-	/** If there is an idle drone, have it return to mining */
+	/** 
+	 * If there is an idle drone, have it return to mining 
+	 * @author Simon Davies
+	 */
 	public void idleWorker(Unit worker)
 	{
 		if (!busyWorkers.contains(worker.getID()))
@@ -434,6 +476,9 @@ public class WorkerManager extends Manager
 	}
 
 	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void gameUpdate()
 	{
 		if (AIClient.DEBUG)
@@ -501,6 +546,7 @@ public class WorkerManager extends Manager
 	}
 
 	/**
+	 * @author Alex Aiton
 	 * @return The type ID for the type of worker unit (drone/scv/probe)
 	 */
 	public int getWorkerTypeID()
@@ -512,6 +558,9 @@ public class WorkerManager extends Manager
 		return workerTypeID;
 	}
 	
+	/**
+	 * @author Alex Aiton
+	 */
 	public void queueOrder( WorkerOrderData order)
 	{
 		

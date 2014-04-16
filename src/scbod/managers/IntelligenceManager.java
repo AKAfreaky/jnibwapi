@@ -29,11 +29,17 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 	protected BaseLocation	enemyStartLocation;
 	protected BaseLocation	startLocation;
 
+	/**
+	 * @author Simon Davies
+	 */
 	public BaseLocation getEnemyStartLocation()
 	{
 		return enemyStartLocation;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public BaseLocation getPlayerStartLocation()
 	{
 		return startLocation;
@@ -70,7 +76,9 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		this.scoutManager	= scoutManager;
 	}
 
-	/** Sends a drone to go scout all of the base locations for the enemy */
+	/** Sends a drone to go scout all of the base locations for the enemy 
+	 * @author Simon Davies 
+	 */
 	public boolean scoutDrone()
 	{
 		// Find a drone
@@ -100,7 +108,7 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 	 * Gets the closest choke point to the enemy base. Calculates it the first
 	 * time it is called, then saves it for later calls.
 	 * 
-	 * @return
+	 * @author Simon Davies
 	 */
 	public ChokePoint getEnemyChokePoint()
 	{
@@ -124,6 +132,9 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		return enemyChokePoint;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public void setBaseLocations()
 	{
 		// Get the base unit 
@@ -150,6 +161,9 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		startLocation = closestLocation;
 	}
 
+	/**
+	 * @author Simon Davies
+	 */
 	public Point getClosestKnownEnemyLocation(Point location)
 	{
 		ArrayList<Point> points = new ArrayList<Point>();
@@ -159,7 +173,10 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		}
 		return Utility.getClosestLocation(points, location);
 	}
-
+	
+	/**
+	 * @author Simon Davies
+	 */
 	public int getEnemyBuildingLocationCount()
 	{
 		return enemyBuildingLocations.size();
@@ -168,6 +185,7 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 	/**
 	 * Returns the nearest non-player start location to the given coordinates.
 	 * 
+	 * @author Simon Davies
 	 * @return The nearest start location from the given coordiantes that is not
 	 *         the players spawn.
 	 */
@@ -190,7 +208,11 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		}
 		return closest;
 	}
-
+	
+	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void gameStarted()
 	{
 		scoutingDrone = false;
@@ -205,6 +227,10 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		setBaseLocations();
 	}
 
+	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void gameUpdate()
 	{
 		if (AIClient.DEBUG)
@@ -226,7 +252,9 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		}
 	}
 
-	/** Returns whether the enemy base location has been foudn */
+	/** Returns whether the enemy base location has been found
+	 *	@author Simon Davies 
+	 */
 	public boolean foundEnemyBase()
 	{
 		if (enemyStartLocation == null)
@@ -239,16 +267,20 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		}
 	}
 
-	/** Returns whether there is a drone/zergling currently scouting */
+	/** Returns whether there is a drone/zergling currently scouting 
+	 * @author Simon Davies
+	 */
 	public boolean isScouting()
 	{
 		return scoutingDrone;
 	}
 
-
+	@Override
 	/**
 	 * On discovering a building, add it to the knowledge base, and if scouting
 	 * return the scout to base.
+	 * 
+	 * @author Simon Davies
 	 */
 	public void unitDiscover(int unitID)
 	{
@@ -270,6 +302,10 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		}
 	}
 
+	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void unitMorph(int unitID)
 	{
 		for (BuildingInfo info : enemyBuildingLocations)
@@ -284,6 +320,10 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		}
 	}
 
+	@Override
+	/**
+	 * @author Simon Davies
+	 */
 	public void unitDestroy(int unitID)
 	{
 		// Check if building is in the knowledge base
@@ -305,6 +345,9 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 	}
 
 	@Override
+	/**
+	 * @author Alex Aiton
+	 */
 	public void scoutRouteCompleted(int scoutID)
 	{
 		if (scoutID == scoutDroneID)
@@ -324,6 +367,9 @@ public class IntelligenceManager extends Manager implements ScoutFinished
 		}
 	}
 	
+	/**
+	 * @author Alex Aiton
+	 */
 	public boolean isEnemyRace( RaceTypes race)
 	{
 		for(Player player: bwapi.getEnemies())

@@ -6,6 +6,11 @@ import scbod.managers.ProductionManager;
 import scbod.managers.ResourceManager;
 import scbod.managers.UnitManager;
 
+/**
+ * Stub sub-class for any Protoss Specific Production behaviours
+ * 
+ * @author Alex Aiton
+ */
 public class ProtossProductionManager extends ProductionManager
 {
 	private ProtossBuildingManager buildingManager;	

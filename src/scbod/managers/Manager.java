@@ -1,6 +1,8 @@
 package scbod.managers;
 
-/** Abstract manager class for BWAPI */
+/** Abstract manager class for BWAPI 
+ *	@author Simon Davies 
+ */
 public abstract class Manager {
 	public void gameStarted(){}
 	public void gameUpdate(){}

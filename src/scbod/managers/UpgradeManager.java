@@ -8,18 +8,23 @@ import jnibwapi.types.TechType.TechTypes;
 import jnibwapi.types.UpgradeType.UpgradeTypes;
 import scbod.IntTriple;
 
-
+/**
+ * Upgrade Manager has general methods to research techs and upgrades, and check their status
+ * @author Alex Aiton
+ */
 public class UpgradeManager extends Manager
 {
 	protected JNIBWAPI bwapi;
 	protected UnitManager unitManager;
+	protected ResourceManager resourceManager;
 	
 	protected ArrayList<IntTriple> upgradeQueue = new ArrayList<IntTriple>();
 	
-	public UpgradeManager(JNIBWAPI bwapi, UnitManager unitManager)
+	public UpgradeManager(JNIBWAPI bwapi, UnitManager unitManager, ResourceManager resourceManager)
 	{
 		this.bwapi = bwapi;
 		this.unitManager = unitManager;
+		this.resourceManager = resourceManager;
 	}
 	
 	

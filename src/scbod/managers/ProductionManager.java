@@ -7,6 +7,11 @@ import jnibwapi.model.Unit;
 import jnibwapi.types.UnitType;
 import scbod.IntTriple;
 
+/**
+ * Production Manager has general methods for the production of units and addons
+ * 
+ * @author Alex Aiton
+ */
 public class ProductionManager extends Manager
 {
 	public ProductionManager(JNIBWAPI bwapi, ResourceManager resourceManager, UnitManager unitManager)
