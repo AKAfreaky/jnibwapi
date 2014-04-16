@@ -235,6 +235,11 @@ public class MilitaryManager extends Manager
 				continue;
 			}
 			
+			if (unit.isBeingConstructed())
+			{
+				continue;
+			}
+			
 			
 			forceSize += type.getSupplyRequired();
 		}
@@ -572,7 +577,14 @@ public class MilitaryManager extends Manager
 		Unit target = getHighestPriorityUnit((new Point(unit.getX(), unit.getY())));
 		if (target != null)
 		{
-			bwapi.attack(unitID, target.getID());
+			// if we can't attack the target, move towards it.
+			if (!bwapi.attack(unitID, target.getID()))
+			{
+				int x = target.getX();
+				int y = target.getY();
+				
+				bwapi.move(unitID, x, y);				
+			}
 		}
 		else
 		{
@@ -661,6 +673,7 @@ public class MilitaryManager extends Manager
 			bwapi.drawText(destination, "Destination", false);
 			bwapi.drawText(0, 0, "Army state : " + state.toString(), true);
 			bwapi.drawText(0, 16, "Force Size : " + getForceSize(), true);
+			bwapi.drawText(128, 64, "Impatience timer:" + (bwapi.getFrameCount() - lastSeenEnemyFrame) + "/" + impatienceTimer, true);
 		}
 
 		// Set to defending if been retreating for a while

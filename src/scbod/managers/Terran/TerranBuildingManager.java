@@ -123,6 +123,7 @@ public class TerranBuildingManager extends BuildingManager
 	@Override
 	public void unitCreate(int unitID)
 	{
+		super.unitCreate(unitID);
 		if (bwapi.getUnitType(bwapi.getUnit(unitID).getTypeID()).isBuilding())
 		{
 			updateBuildLocations(unitID);

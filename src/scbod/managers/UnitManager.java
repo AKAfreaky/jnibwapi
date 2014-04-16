@@ -138,6 +138,11 @@ public class UnitManager extends Manager
 		return chosenUnit;
 	}
 	
+	public boolean haveFreeUnitofType(int typeID)
+	{
+		return (getLeastBusyUnitofType(typeID) != null);
+	}
+	
 	/**
 	 * Do we have the necessary resources/buildings/techs to create the given unit type
 	 * 
